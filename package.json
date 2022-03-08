@@ -9,17 +9,8 @@
 	"categories": [
 		"Other"
 	],
-	"activationEvents": [
-		"onCommand:vscode-jupyter-powertoys.helloWorld"
-	],
 	"main": "./out/extension.js",
 	"contributes": {
-		"commands": [
-			{
-				"command": "vscode-jupyter-powertoys.helloWorld",
-				"title": "Hello World"
-			}
-		]
 	},
 	"scripts": {
 		"vscode:prepublish": "npm run compile",
