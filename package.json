@@ -10,6 +10,9 @@
 		"Other"
 	],
 	"main": "./out/extension.js",
+	"activationEvents": [
+		"onNotebook:jupyter-notebook"
+	],
 	"contributes": {
 	},
 	"scripts": {
