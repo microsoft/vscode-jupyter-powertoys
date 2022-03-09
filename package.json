@@ -9,13 +9,13 @@
 	"homepage": "https://github.com/Microsoft/vscode-jupyter-powertoys",
 	"description": "Optional, experimental, and advanced features for Jupyter notebook support in VS Code.",
 	"repository": {
-        "type": "git",
-        "url": "https://github.com/Microsoft/vscode-jupyter-powertoys"
-    },
-    "bugs": {
-        "url": "https://github.com/Microsoft/vscode-jupyter-powertoys/issues"
-    },
-    "qna": "https://github.com/microsoft/vscode-jupyter-powertoys/discussions",
+		"type": "git",
+		"url": "https://github.com/Microsoft/vscode-jupyter-powertoys"
+	},
+	"bugs": {
+		"url": "https://github.com/Microsoft/vscode-jupyter-powertoys/issues"
+	},
+	"qna": "https://github.com/microsoft/vscode-jupyter-powertoys/discussions",
 	"version": "0.0.1",
 	"engines": {
 		"vscode": "^1.65.0"
@@ -24,24 +24,23 @@
 		"ms-toolsai.jupyter"
 	],
 	"keywords": [
-        "jupyter",
-        "notebook",
-        "ipynb",
-        "notebookKernelJupyterNotebook"
-    ],
-    "categories": [
-        "Other",
-        "Data Science",
-        "Machine Learning",
-        "Notebooks",
-        "Visualization"
-    ],
+		"jupyter",
+		"notebook",
+		"ipynb",
+		"notebookKernelJupyterNotebook"
+	],
+	"categories": [
+		"Other",
+		"Data Science",
+		"Machine Learning",
+		"Notebooks",
+		"Visualization"
+	],
 	"main": "./out/extension.js",
 	"activationEvents": [
 		"onNotebook:jupyter-notebook"
 	],
-	"contributes": {
-	},
+	"contributes": {},
 	"scripts": {
 		"vscode:prepublish": "npm run compile",
 		"compile": "tsc -p ./",

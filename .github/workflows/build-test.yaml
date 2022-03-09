@@ -16,7 +16,7 @@ env:
 
 jobs:
   build:
-    name: Build Distribution
+    name: Build
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -33,33 +33,33 @@ jobs:
       - run: npm run compile
         name: npm run compile
 
-  test:
-    timeout-minutes: 30
-    name: Tests
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest]
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
+  # test:
+    # timeout-minutes: 30
+    # name: Tests
+    # runs-on: ${{ matrix.os }}
+    # strategy:
+      # fail-fast: false
+      # matrix:
+        # os: [ubuntu-latest]
+    # steps:
+      # - name: Checkout
+        # uses: actions/checkout@v2
 
-      - name: Use Node ${{env.NODE_VERSION}}
-        uses: actions/setup-node@v2.1.5
-        with:
-          node-version: ${{env.NODE_VERSION}}
+      # - name: Use Node ${{env.NODE_VERSION}}
+        # uses: actions/setup-node@v2.1.5
+        # with:
+          # node-version: ${{env.NODE_VERSION}}
 
-      - run: npm install
-        name: npm install
+      # - run: npm install
+        # name: npm install
 
-      - run: npm run compile
-        name: npm run compile
+      # - run: npm run compile
+        # name: npm run compile
 
-      - name: Run tests using xvfb
-        env:
-          DISPLAY: 10
-        uses: GabrielBB/xvfb-action@v1.4
-        id: test_id
-        with:
-          run: npm run test
+      # - name: Run tests using xvfb
+        # env:
+          # DISPLAY: 10
+        # uses: GabrielBB/xvfb-action@v1.4
+        # id: test_id
+        # with:
+          # run: npm run test
