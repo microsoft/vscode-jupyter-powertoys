@@ -55,6 +55,9 @@ jobs:
 
       - run: npm run compile
         name: npm run compile
+      
+      - run: code --install-extension ms-toolsai.jupyter
+        name: Install Jupyter extension
 
       - name: Run tests using xvfb
         env:
