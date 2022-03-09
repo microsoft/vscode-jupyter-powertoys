@@ -4,9 +4,17 @@ import * as vscode from 'vscode';
 suite('Extension Test Suite', () => {
 	vscode.window.showInformationMessage('Start all tests.');
 
-	// Leaving in sample test to test on CI
-	test('Sample test', () => {
-		assert.strictEqual(-1, [1, 2, 3].indexOf(5));
-		assert.strictEqual(-1, [1, 2, 3].indexOf(0));
+	// Test to make sure that we can activate our extension
+	test('Extension Activation', async () => {
+		const ptExtension = vscode.extensions.getExtension('ms-toolsai.vscode-jupyter-powertoys');
+
+		if (!ptExtension) {
+			assert.fail('Failed to find powertoys extension');
+		}
+
+		// If not activated, activate it
+		await ptExtension.activate();
+
+		assert(ptExtension.isActive);
 	});
 });
