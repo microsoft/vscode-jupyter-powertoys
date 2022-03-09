@@ -8,8 +8,7 @@ on:
   pull_request:
     branches:
       - main
-  check_run:
-    types: [rerequested, requested_action]
+  workflow_dispatch:
 
 env:
   NODE_VERSION: 14.16.0
