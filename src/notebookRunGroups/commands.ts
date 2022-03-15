@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { getCellRunGroupMetadata, updateCellRunGroupMetadata } from './cellMetadataHelpers';
+import { getCellRunGroupMetadata, updateCellRunGroupMetadata } from './util/cellMetadataHelpers';
 import { updateContextKeys } from './contextKeys';
 import { RunGroup } from './enums';
 import { log } from './util/logging';

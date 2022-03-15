@@ -1,6 +1,6 @@
 // Code for working with the VS Code cell status bar to indicate group memberships
 import * as vscode from 'vscode';
-import { getCellRunGroupMetadata } from './cellMetadataHelpers';
+import { getCellRunGroupMetadata } from './util/cellMetadataHelpers';
 import { RunGroup } from './enums';
 
 // Register our provider

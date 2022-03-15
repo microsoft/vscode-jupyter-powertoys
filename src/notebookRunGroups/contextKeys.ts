@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { getCellRunGroupMetadata } from './cellMetadataHelpers';
+import { getCellRunGroupMetadata } from './util/cellMetadataHelpers';
 
 // To work around some issues with context keys I'm only considering the currently selected cell for
 // determining if I should show the remove or add buttons for each group. Long term I don't like this

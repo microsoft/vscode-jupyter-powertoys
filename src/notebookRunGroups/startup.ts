@@ -4,7 +4,7 @@ import { registerCommands } from './commands';
 import { registerDocuments } from './documents';
 import { registerCellStatusBarProvider } from './cellStatusBar';
 
-export function startup(context: vscode.ExtensionContext) {
+export function activateNotebookRunGroups(context: vscode.ExtensionContext) {
 	// Register all of our commands
 	registerCommands(context);
 
