@@ -1,0 +1,15 @@
+- [x] Add the correct commands and correct command placement
+- [x] Add custom SVG icons
+- [x] Add button functionality to add cells into a run group
+- [x] Save group membership in cell metadata
+- [x] When in a group, hide the add for that group and show the remove
+- [x] Run execution commands to run cell in a group
+- [x] Make sure that custom metadata is saving
+- [x] Clean up and consolidate metadata access
+- [ ] Clean up TODOs
+- [x] Consolidated run button
+- [x] Use cell status to show group membership
+- [ ] Restrict when command palette commands show up
+- [ ] Basic VS Code tests
+- [ ] Cleanup README and skeleton code
+- [ ] Release on marketplace
