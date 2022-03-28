@@ -1,13 +1,18 @@
 import * as vscode from 'vscode';
 import { activateNotebookRunGroups } from './notebookRunGroups/startup';
+import { activate as activateKernelManagement } from './kernelManager/extension';
 
-export function activate(context: vscode.ExtensionContext) {
-    // All PowerToy features should have a top level enable / disable setting 
+export async function activate(context: vscode.ExtensionContext) {
+    // All PowerToy features should have a top level enable / disable setting
     // When disabled don't show the feature at all (also hide commands)
 
     // Notebook Run Groups
     if (vscode.workspace.getConfiguration('notebookRunGroups').get('enabled')) {
         activateNotebookRunGroups(context);
+    }
+    // Notebook Run Groups
+    if (vscode.workspace.getConfiguration('jupyter').get('kernelManagement.enabled')) {
+        await activateKernelManagement(context);
     }
 }
 
