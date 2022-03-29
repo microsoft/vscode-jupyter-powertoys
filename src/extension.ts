@@ -10,7 +10,6 @@ export async function activate(context: vscode.ExtensionContext) {
     if (vscode.workspace.getConfiguration('notebookRunGroups').get('enabled')) {
         activateNotebookRunGroups(context);
     }
-    // Notebook Run Groups
     if (vscode.workspace.getConfiguration('jupyter').get('kernelManagement.enabled')) {
         await activateKernelManagement(context);
     }
