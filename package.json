@@ -130,11 +130,6 @@
 				}
 			},
 			{
-				"command": "jupyter-kernelManager.helloWorld",
-				"title": "Hello world",
-				"category": "Notebook"
-			},
-			{
 				"command": "jupyter-kernelManager.shutdownKernel",
 				"title": "Shutdown Kernel",
 				"category": "Notebook",

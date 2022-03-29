@@ -11,16 +11,6 @@ import { CommandHandler } from './commandHandler';
 // your extension is activated the very first time the command is executed
 export async function activate(context: ExtensionContext) {
 	void initializeKnownLanguages();
-    // The command has been defined in the package.json file
-    // Now provide the implementation of the command with registerCommand
-    // The commandId parameter must match the command field in package.json
-    let disposable = commands.registerCommand('jupyter-kernelManager.helloWorld', () => {
-        // The code you place here will be executed every time your command is executed
-        // Display a message box to the user
-        window.showInformationMessage('Hello World from vscode-kernel-manager!');
-    });
-
-    context.subscriptions.push(disposable);
     const jupyterExt = extensions.getExtension<JupyterAPI>('ms-toolsai.jupyter');
     if (!jupyterExt) {
         return;
