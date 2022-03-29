@@ -43,7 +43,8 @@
     ],
     "main": "./out/extension.js",
     "activationEvents": [
-        "onNotebook:*"
+        "onNotebook:*",
+        "onView:jupyterKernelsView"
     ],
     "contributes": {
         "commands": [
@@ -127,6 +128,36 @@
                     "light": "src/notebookRunGroups/icons/RunGroupThree/RunGroupThreeRemove-light.svg",
                     "dark": "src/notebookRunGroups/icons/RunGroupThree/RunGroupThreeRemove-dark.svg"
                 }
+            },
+            {
+                "command": "jupyter-kernelManager.shutdownKernel",
+                "title": "Shutdown Kernel",
+                "category": "Notebook",
+                "icon": "$(trash)"
+            },
+            {
+                "command": "jupyter-kernelManager.refreshKernels",
+                "title": "Refresh Kernels",
+                "category": "Notebook",
+                "icon": "$(refresh)"
+            },
+            {
+                "command": "jupyter-kernelManager.interruptKernel",
+                "title": "Interrupt Kernel",
+                "category": "Notebook",
+                "icon": "$(debug-stop)"
+            },
+            {
+                "command": "jupyter-kernelManager.restartKernel",
+                "title": "Restart Kernel",
+                "category": "Notebook",
+                "icon": "$(debug-restart)"
+            },
+            {
+                "command": "jupyter-kernelManager.createnewinteractive",
+                "title": "Create Interactive Window",
+                "category": "Notebook",
+                "icon": "$(window)"
             }
         ],
         "menus": {
@@ -175,6 +206,11 @@
                     "command": "vscode-notebook-groups.removeGroup3",
                     "group": "Notebook Run Groups",
                     "when": "config.notebookRunGroups.groupCount > 2 && config.notebookRunGroups.enabled"
+                },
+                {
+                    "command": "jupyter-kernelManager.shutdownKernel",
+                    "group": "Notebook",
+                    "when": "config.jupyter.kernelManagement.enabled && false && (jupyter.ispythonorinteractiveeactive || jupyter.isnativeactive)"
                 }
             ],
             "notebook/toolbar": [
@@ -268,6 +304,45 @@
                     "command": "vscode-notebook-groups.executeGroup3",
                     "when": "config.notebookRunGroups.groupCount > 2 && notebookRunGroups.inGroupThree && config.notebookRunGroups.runIconsInExecute && config.notebookRunGroups.enabled"
                 }
+            ],
+            "view/title": [
+                {
+                    "command": "jupyter-kernelManager.refreshKernels",
+                    "group": "navigation",
+                    "when": "view == jupyterKernelsView"
+                }
+            ],
+            "view/item/context": [
+                {
+                    "command": "jupyter-kernelManager.createnewinteractive",
+                    "when": "viewItem =~ /kernelSpec:/ || viewItem =~ /remote:activeKernel:/",
+                    "group": "inline"
+                },
+                {
+                    "command": "jupyter-kernelManager.shutdownKernel",
+                    "when": "view == jupyterKernelsView && viewItem =~ /activeKernel:/",
+                    "group": "inline"
+                },
+                {
+                    "command": "jupyter-kernelManager.interruptKernel",
+                    "when": "view == jupyterKernelsView && viewItem =~ /activeKernel:/",
+                    "group": "inline"
+                },
+                {
+                    "command": "jupyter-kernelManager.restartKernel",
+                    "when": "view == jupyterKernelsView && viewItem =~ /activeKernel:/",
+                    "group": "inline"
+                }
+            ]
+        },
+        "views": {
+            "jupyter": [
+                {
+                    "type": "tree",
+                    "id": "jupyterKernelsView",
+                    "name": "Kernels",
+                    "when": "!jupyter.hasKernels && config.jupyter.kernelManagement.enabled"
+                }
             ]
         },
         "configuration": [
@@ -310,6 +385,12 @@
                         "default": true,
                         "description": "Display group run icons in the cell execute dropdown.",
                         "scope": "machine"
+                    },
+                    "jupyter.kernelManagement.enabled": {
+                        "type": "boolean",
+                        "default": true,
+                        "description": "Enable the Kernel Management feature providing ability to start/stop/interrupt kernels.",
+                        "scope": "machine"
                     }
                 }
             }
@@ -341,5 +422,10 @@
         "mocha": "^9.1.3",
         "typescript": "^4.4.4",
         "vscode-dts": "^0.3.3"
+    },
+    "dependencies": {
+        "@jupyterlab/services": "^6.3.2",
+        "fs-extra": "^10.0.1",
+        "untildify": "^4.0.0"
     }
 }
