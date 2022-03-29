@@ -27,6 +27,7 @@ import { getDisplayPath, getLanguageExtension } from './utils';
 import { PYTHON_LANGUAGE } from './constants';
 import { getPythonEnvironmentCategory } from './integration';
 
+export const ipynbNameToTemporarilyStartKernel = '__dummy__.ipynb';
 type Node =
     | IServerTreeNode
     | IKernelSpecRootTreeNode
@@ -66,14 +67,14 @@ export interface IKernelSpecTreeNode {
 export interface IActiveLocalKernelTreeNode {
     type: 'activeLocalKernel';
     kernelConnectionMetadata: LocalKernelSpecConnectionMetadata | PythonKernelConnectionMetadata;
-    notebook: NotebookDocument;
+    uri: Uri;
     connection: IKernelConnectionInfo;
     parent: Node;
 }
 export interface IActiveRemoteKernelTreeNode {
     type: 'activeRemoteKernel';
     kernelConnectionMetadata: LiveRemoteKernelConnectionMetadata | RemoteKernelSpecConnectionMetadata;
-    notebook?: NotebookDocument;
+    uri?: Uri;
     connection?: IKernelConnectionInfo;
     parent: Node;
 }
@@ -284,8 +285,8 @@ class KernelSpecTreeItem extends TreeItem {
 class ActiveLocalOrRemoteKernelConnectionTreeItem extends TreeItem {
     constructor(public readonly data: IActiveLocalKernelTreeNode | IActiveRemoteKernelTreeNode) {
         super(getDisplayNameOrNameOfKernelConnection(data.kernelConnectionMetadata), TreeItemCollapsibleState.None);
-        if (data.notebook) {
-            this.description = path.basename(data.notebook.uri.fsPath);
+        if (data.uri && !data.uri.fsPath.endsWith(ipynbNameToTemporarilyStartKernel)) {
+            this.description = path.basename(data.uri.fsPath);
         }
         const ext = getLanguageExtension(getKernelConnectionLanguage(data.kernelConnectionMetadata));
         this.resourceUri = ext ? Uri.parse(`one${ext}`) : undefined;
@@ -602,7 +603,7 @@ export class KernelTreeView implements TreeDataProvider<Node> {
                                 // We can use the existing kernel for status information & the like.
                                 if (
                                     remoteActiveKernelStartedUsingConnectToRemoveKernelSpec.some((activeRemote) => {
-                                        const kernel = this.kernelService.getKernel(activeRemote.notebook);
+                                        const kernel = this.kernelService.getKernel(activeRemote.uri);
                                         return kernel?.connection.connection.id === item.kernelModel.id;
                                     })
                                 ) {
@@ -623,12 +624,13 @@ export class KernelTreeView implements TreeDataProvider<Node> {
                                     remoteActiveKernels.splice(activeInfoIndex, 1);
                                 }
                                 const info = activeInfo
-                                    ? await this.kernelService.getKernel(activeInfo?.notebook)
+                                    ? await this.kernelService.getKernel(activeInfo?.uri)
                                     : undefined;
-                                if (info) {
+                                if (info && activeInfo?.uri) {
                                     activeRemoteKernelNodes.push(<IActiveRemoteKernelTreeNode>{
                                         type: 'activeRemoteKernel',
                                         kernelConnectionMetadata: item,
+                                        uri: activeInfo.uri,
                                         ...info,
                                         parent: element
                                     });
@@ -653,7 +655,7 @@ export class KernelTreeView implements TreeDataProvider<Node> {
                         }
                         // Sometimes we start kernels just to kill them.
                         if (item.metadata.kind === 'startUsingRemoteKernelSpec') {
-                            const kernel = this.kernelService.getKernel(item.notebook);
+                            const kernel = this.kernelService.getKernel(item.uri);
                             if (kernel && uniqueKernelIds.has(kernel.connection.connection.id)) {
                                 return;
                             }
@@ -662,7 +664,7 @@ export class KernelTreeView implements TreeDataProvider<Node> {
                         activeRemoteKernelNodes.push(<IActiveRemoteKernelTreeNode>{
                             type: 'activeRemoteKernel',
                             kernelConnectionMetadata: item.metadata,
-                            notebook: item.notebook,
+                            uri: item.uri,
                             parent: element
                         });
                     });
@@ -673,8 +675,8 @@ export class KernelTreeView implements TreeDataProvider<Node> {
                     );
                     const localActiveKernelsWithInfo = await Promise.all(
                         localActiveKernelSpecs.map(async (item) => {
-                            const info = await this.kernelService.getKernel(item.notebook);
-                            return { ...info, notebook: item.notebook };
+                            const info = await this.kernelService.getKernel(item.uri);
+                            return { ...info, uri: item.uri };
                         })
                     );
                     const activeLocalKernelNodes = localActiveKernelsWithInfo
@@ -683,7 +685,7 @@ export class KernelTreeView implements TreeDataProvider<Node> {
                             return <IActiveLocalKernelTreeNode>{
                                 connection: item.connection!,
                                 kernelConnectionMetadata: item.metadata!,
-                                notebook: item.notebook,
+                                uri: item.uri,
                                 type: 'activeLocalKernel',
                                 parent: element
                             };
@@ -715,7 +717,7 @@ export class KernelTreeView implements TreeDataProvider<Node> {
                 (item) =>
                     item.connection === localActiveKernel.connection &&
                     item.kernelConnectionMetadata === localActiveKernel.kernelConnectionMetadata &&
-                    item.notebook === localActiveKernel.notebook &&
+                    item.uri.toString() === localActiveKernel.uri.toString() &&
                     item.type === localActiveKernel.type
             )
         ) {

@@ -3,6 +3,7 @@ import {
     IActiveLocalKernelTreeNode,
     IActiveRemoteKernelTreeNode,
     IKernelSpecTreeNode,
+    ipynbNameToTemporarilyStartKernel,
     KernelTreeView
 } from './kernelTreeView';
 import { IExportedKernelService } from './vscodeJupyter';
@@ -46,18 +47,15 @@ export class CommandHandler {
     private async createInteractiveWindow(
         node: IActiveRemoteKernelTreeNode | IActiveLocalKernelTreeNode | IKernelSpecTreeNode
     ) {
-        if (
-            node.kernelConnectionMetadata.kind === 'startUsingRemoteKernelSpec' &&
-            node.type === 'activeRemoteKernel' &&
-            node.notebook
-        ) {
-            const kernel = this.kernelService.getKernel(node.notebook);
+        if (node.kernelConnectionMetadata.kind === 'startUsingRemoteKernelSpec' && node.type === 'activeRemoteKernel') {
+            const kernel = node.uri ? this.kernelService.getKernel(node.uri) : undefined;
             const activeKernels = await this.kernelService.getKernelSpecifications(true);
-            const activeKernelSpecConnection = activeKernels.find(
-                (item) =>
-                    item.kind === 'connectToLiveKernel' &&
-                    item.kernelModel.id === kernel?.connection.connection.id
-            );
+            const activeKernelSpecConnection =
+                kernel &&
+                activeKernels.find(
+                    (item) =>
+                        item.kind === 'connectToLiveKernel' && item.kernelModel.id === kernel?.connection.connection.id
+                );
             if (activeKernelSpecConnection) {
                 void commands.executeCommand('jupyter.createnewinteractive', activeKernelSpecConnection);
                 return;
@@ -97,8 +95,8 @@ export class CommandHandler {
 
         const result = await window.showWarningMessage(
             'Are you sure you want to shutdown the kernel?',
+            { modal: true },
             'Yes',
-            'No',
             'Yes, do not ask again'
         );
         switch (result) {
@@ -120,8 +118,8 @@ export class CommandHandler {
         if (!kernelConnection) {
             return;
         }
-        if (a.notebook) {
-            void commands.executeCommand('jupyter.notebookeditor.restartkernel', a.notebook.uri);
+        if (a.uri) {
+            void commands.executeCommand('jupyter.notebookeditor.restartkernel', a.uri);
             return;
         }
         if (this.context.globalState.get<boolean>('dontAskRestartKernel', false)) {
@@ -167,8 +165,8 @@ export class CommandHandler {
         if (!a.connection?.connection) {
             // Check if we already have an active connection for this.
             // If this is a remote kernel and we have already connected to this, then we can just shutdown that kernel.
-            if (a.kernelConnectionMetadata.kind === 'startUsingRemoteKernelSpec' && a.notebook) {
-                const kernel = this.kernelService.getKernel(a.notebook);
+            if (a.kernelConnectionMetadata.kind === 'startUsingRemoteKernelSpec' && a.uri) {
+                const kernel = this.kernelService.getKernel(a.uri);
                 if (kernel) {
                     return kernel.connection.connection;
                 }
@@ -176,10 +174,16 @@ export class CommandHandler {
                 return;
             }
             try {
-                // Connect to the kernel and shut it down.
-                const filePath = path.join(this.context.extensionUri.fsPath, 'resources', 'empty.ipynb');
-                const nb = await workspace.openNotebookDocument(Uri.file(filePath));
-                const kernel = await this.kernelService.startKernel(a.kernelConnectionMetadata, nb);
+                // Connect to the remote kernel.
+                const workspaceFolder = workspace.workspaceFolders?.length
+                    ? workspace.workspaceFolders[0].uri
+                    : this.context.extensionUri;
+                const filePath = path.join(
+                    workspaceFolder.fsPath,
+                    a.kernelConnectionMetadata.id,
+                    ipynbNameToTemporarilyStartKernel
+                );
+                const kernel = await this.kernelService.startKernel(a.kernelConnectionMetadata, Uri.file(filePath));
                 return kernel.connection;
             } catch (ex) {
                 console.error('Failed to shutdown kernel', ex);
