@@ -128,10 +128,10 @@ export class CommandHandler {
         }
 
         const result = await window.showWarningMessage(
-            'Do you want to restart the Jupyter kernel? All variables will be lost.',
+            'Do you want to restart the Jupyter kernel?',
+            { modal: true, detail: 'All variables will be lost.' },
             'Restart',
-            "Yes, Don't Ask Again",
-            'Cancel'
+            "Yes, Don't Ask Again"
         );
         switch (result) {
             case "Yes, Don't Ask Again":
