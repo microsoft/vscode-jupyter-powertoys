@@ -34,6 +34,9 @@ export class CommandHandler {
             commands.registerCommand('jupyter-kernelManager.createnewinteractive', this.createInteractiveWindow, this)
         );
         this.disposables.push(
+            commands.registerCommand('jupyter-kernelManager.editKernelSpec', this.editKernelSpec, this)
+        );
+        this.disposables.push(
             commands.registerCommand(
                 'jupyter-kernelManager.refreshKernels',
                 async () => {
@@ -157,6 +160,16 @@ export class CommandHandler {
         } finally {
             KernelTreeView.refresh(a.parent);
         }
+    }
+    private async editKernelSpec(a: IKernelSpecTreeNode) {
+        if (
+            a.kernelConnectionMetadata.kind !== 'startUsingLocalKernelSpec' ||
+            !a.kernelConnectionMetadata.kernelSpec.specFile
+        ) {
+            return;
+        }
+        const document = await workspace.openTextDocument(a.kernelConnectionMetadata.kernelSpec.specFile);
+        void window.showTextDocument(document);
     }
     private async getKernelConnection(a: IActiveRemoteKernelTreeNode | IActiveLocalKernelTreeNode) {
         if (!(await this.isValidConnection(a))) {

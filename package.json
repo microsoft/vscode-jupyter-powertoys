@@ -158,6 +158,12 @@
                 "title": "Create Interactive Window",
                 "category": "Notebook",
                 "icon": "$(window)"
+            },
+            {
+                "command": "jupyter-kernelManager.editKernelSpec",
+                "title": "Edit KernelSpec",
+                "category": "Notebook",
+                "icon": "$(json)"
             }
         ],
         "menus": {
@@ -331,6 +337,11 @@
                 {
                     "command": "jupyter-kernelManager.restartKernel",
                     "when": "view == jupyterKernelsView && viewItem =~ /activeKernel:/",
+                    "group": "inline"
+                },
+                {
+                    "command": "jupyter-kernelManager.editKernelSpec",
+                    "when": "view == jupyterKernelsView && viewItem =~ /:startUsingLocalKernelSpec/",
                     "group": "inline"
                 }
             ]
