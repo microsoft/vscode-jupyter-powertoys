@@ -427,6 +427,7 @@
         "@typescript-eslint/eslint-plugin": "^5.1.0",
         "@typescript-eslint/parser": "^5.1.0",
         "@vscode/test-electron": "^1.6.2",
+        "crypto": "^1.0.1",
         "deemon": "^1.6.0",
         "eslint": "^8.1.0",
         "glob": "^7.1.7",
