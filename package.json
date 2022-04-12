@@ -43,7 +43,8 @@
     ],
     "main": "./out/extension.js",
     "activationEvents": [
-        "onNotebook:*",
+        "onNotebook:jupyter-notebook",
+        "onNotebook:interactive",
         "onView:jupyterKernelsView"
     ],
     "contributes": {
