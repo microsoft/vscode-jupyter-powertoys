@@ -1,3 +1,5 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
 import * as path from 'path';
 import { ConnectionStatus, IKernelConnection, Status } from '@jupyterlab/services/lib/kernel/kernel';
 import {

@@ -1,3 +1,5 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
 import * as vscode from 'vscode';
 import { activateNotebookRunGroups } from './notebookRunGroups/startup';
 import { activate as activateKernelManagement } from './kernelManager/extension';

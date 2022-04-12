@@ -1,3 +1,5 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
 import { languages, Uri, WorkspaceFolder } from 'vscode';
 import * as path from 'path';
 import { languageAliases, languages as knownLanguages } from './languages';
