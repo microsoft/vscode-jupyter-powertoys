@@ -12,3 +12,30 @@ instructions provided by the bot. You will only need to do this once across all 
 This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/).
 For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/)
 or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
+
+## Development Process
+
+### Create An Issue
+Before starting on a PR an [issue](https://github.com/microsoft/vscode-jupyter-powertoys/issues) should be created.
+Submissions that do not have an associated issue are unlikely to be approved.
+
+### Prerequisites
+1. [Node.js](https://nodejs.org/)
+2. [Visual Studio Code](https://code.visualstudio.com/)
+
+### Setup
+```shell
+git clone https://github.com/Microsoft/vscode-jupyter-powertoys
+cd vscode-jupyter-powertoys
+npm ci
+```
+
+### Running And Testing The Extension
+Open the vscode-jupyter-powertoys folder in VS Code. After opening, there will be "Run Extension" and "Extension Tests"
+debug targets that can be used to either build and launch the extension in a new instance of VS Code or to launch and
+run the test suites.
+
+### Feature Independence
+Any new features added to this extension should be contained to a single folder under the src directory (plus src/test for tests).
+Features should all have a top level `enabled` setting so individual features can be turned on and off. This `enabled` setting should
+be checked both with command contributions and with the activation of the feature from the main `extension.ts` file.
