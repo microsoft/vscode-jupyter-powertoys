@@ -1,3 +1,5 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
 import { EnvironmentType, PythonEnvironment } from './vscodeJupyter';
 
 export function getPythonEnvironmentCategory(interpreter: PythonEnvironment) {

@@ -1,3 +1,5 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
 // Code for working with the VS Code cell status bar to indicate group memberships
 import * as vscode from 'vscode';
 import { getCellRunGroupMetadata } from './util/cellMetadataHelpers';

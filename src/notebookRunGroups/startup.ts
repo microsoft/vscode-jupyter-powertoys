@@ -1,5 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
 import * as vscode from 'vscode';
-import { log } from './util/logging';
 import { registerCommands } from './commands';
 import { registerDocuments } from './documents';
 import { registerCellStatusBarProvider } from './cellStatusBar';

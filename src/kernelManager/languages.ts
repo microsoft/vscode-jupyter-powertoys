@@ -1,3 +1,5 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
 // https://github.com/shikijs/shiki/blob/main/scripts/grammarSources.ts
 const _languageAliases = {
     bat: new Set(['batch']),
