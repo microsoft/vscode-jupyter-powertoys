@@ -35,4 +35,4 @@ individual features provided by this extension.
 The notebook run groups feature provides the ability to group notebook cells into a sets of cells which can be
 executed as a group together. The `Jupyter > Notebook Run Groups > Group Count` setting controls the number of these groups available, from one to three. Icons to add or remove cells from groups are added to the toolbar of each notebook cell. Cell groups can be executed via the command palette, optional icons in the cell toolbar, or from the dropdown on the cell run button.
 
-<img src=https://raw.githubusercontent.com/microsoft/vscode-jupyter-powertoys/images/README/NotebookRunGroups.gif?>
+<img src=https://raw.githubusercontent.com/microsoft/vscode-jupyter-powertoys/main/images/README/NotebookRunGroups.gif?>
