@@ -21,3 +21,18 @@ trademarks or logos is subject to and must follow
 [Microsoft's Trademark & Brand Guidelines](https://www.microsoft.com/en-us/legal/intellectualproperty/trademarks/usage/general).
 Use of Microsoft trademarks or logos in modified versions of this project must not cause confusion or imply Microsoft sponsorship.
 Any use of third-party trademarks or logos are subject to those third-party's policies.
+
+## Features
+
+### General Feature Usage
+
+All features provided by the Jupyter PowerToys extension can be enabled or disabled via settings. Search for
+`Jupyter PowerToys` from the VS Code settings UI and change the `enabled` setting to add or remove any of the
+individual features provided by this extension.
+
+### Notebook Run Groups
+
+The notebook run groups feature provides the ability to group notebook cells into a sets of cells which can be
+executed as a group together. The `Jupyter > Notebook Run Groups > Group Count` setting controls the number of these groups available, from one to three. Icons to add or remove cells from groups are added to the toolbar of each notebook cell. Cell groups can be executed via the command palette, optional icons in the cell toolbar, or from the dropdown on the cell run button.
+
+<img src=https://raw.githubusercontent.com/microsoft/vscode-jupyter-powertoys/images/README/NotebookRunGroups.gif?>
