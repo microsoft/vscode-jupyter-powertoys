@@ -415,6 +415,7 @@
         "watch": "npm run -S esbuild-base -- --sourcemap --watch",
         "compile": "npm run build",
         "test-compile": "tsc -p ./",
+        "test": "node ./out/test/runTest.js",
         "lint": "eslint src --ext ts",
         "postinstall": "npm run download-api",
         "download-api": "vscode-dts dev",
