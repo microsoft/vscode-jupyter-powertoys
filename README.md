@@ -1,6 +1,6 @@
 # Project
 
-This Visual Studio Code extension provides experimental, advanced, and optional features to extend the Jupyter notebook experience in VS Code.
+This Visual Studio Code extension provides experimental features to extend the Jupyter notebook experience in VS Code.
 
 This extension is intended to supplement the features provided by the main [Jupyter extension](https://marketplace.visualstudio.com/items?itemName=ms-toolsai.jupyter). As this extension is providing experimental features, there is no set roadmap for how features will be added or removed from it. Features may be added or removed at any time and there is no guarantee of future support by virtue of inclusion in the extension now. Features in this extension that see high usage may be considered for removal from this extension and inclusion in the main Jupyter VS Code extension. In that case, best efforts will be made to notify of the change and migrate settings if possible.
 
@@ -13,6 +13,8 @@ feature request as a [new Issue](https://github.com/microsoft/vscode-jupyter-pow
 For help and questions about using this project, please start a Discussion on our [GitHub Discussions page](https://github.com/microsoft/vscode-jupyter-powertoys/discussions).
 
 For those interested in contributing to the code of this project please see the [contributing guide](https://github.com/microsoft/vscode-jupyter-powertoys/blob/main/CONTRIBUTING.md).
+
+These are experimental features, so support for help and bug fixing regarding them may be limited.
 
 ## Trademarks
 
