@@ -55,6 +55,9 @@ jobs:
 
       - run: npm run compile
         name: npm run compile
+
+      - run: npm run test-compile
+        name: npm run test-compile
       
       - name: Run tests using xvfb
         env:
