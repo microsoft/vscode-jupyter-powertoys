@@ -1,16 +1,29 @@
 {
     "compilerOptions": {
+        "baseUrl": ".",
+        "paths": {
+            "*": ["types/*"]
+        },
         "module": "commonjs",
-        "target": "ES2020",
+        "target": "es2018",
         "outDir": "out",
-        "lib": ["dom", "ES2020"],
+        "lib": ["es6", "es2018", "dom", "ES2019", "ES2020"],
+        "jsx": "react",
         "sourceMap": true,
         "rootDir": "src",
-        "strict": true /* enable all strict type-checking options */
-        /* Additional Checks */
-        // "noImplicitReturns": true, /* Report error when not all code paths in function return a value. */
-        // "noFallthroughCasesInSwitch": true, /* Report errors for fallthrough cases in switch statement. */
-        // "noUnusedParameters": true,  /* Report errors on unused parameters. */
+        "experimentalDecorators": true,
+        "allowSyntheticDefaultImports": true,
+        "strict": true,
+        "noImplicitAny": true,
+        "noImplicitThis": true,
+        "noUnusedLocals": false,
+        "noUnusedParameters": false,
+        "noImplicitOverride": false,
+        "noFallthroughCasesInSwitch": false,
+        "resolveJsonModule": true,
+        "removeComments": true,
+        "useUnknownInCatchVariables": false,
+        "types": ["webpack-env"]
     },
     "exclude": ["node_modules", ".vscode-test", "./src/contextualHelp/ui"]
 }

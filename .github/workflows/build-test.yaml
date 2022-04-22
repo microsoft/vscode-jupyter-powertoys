@@ -2,67 +2,70 @@
 name: Build and Test
 
 permissions:
-  deployments: write
+    deployments: write
 
 on:
-  pull_request:
-    branches:
-      - main
-  workflow_dispatch:
+    pull_request:
+        branches:
+            - main
+    workflow_dispatch:
 
 env:
-  NODE_VERSION: 14.16.0
-  IS_CI: 1
+    NODE_VERSION: 16.13.0
+    IS_CI: 1
 
 jobs:
-  build:
-    name: Build
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
+    build:
+        name: Build
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v2
 
-      - name: Use Node ${{env.NODE_VERSION}}
-        uses: actions/setup-node@v2.1.5
-        with:
-          node-version: ${{env.NODE_VERSION}}
+            - name: Use Node ${{env.NODE_VERSION}}
+              uses: actions/setup-node@v2.1.5
+              with:
+                  node-version: ${{env.NODE_VERSION}}
 
-      - run: npm install
-        name: npm install
+            - run: npm install
+              name: npm install
 
-      - run: npm run compile
-        name: npm run compile
+            - run: npm run compile
+              name: npm run compile
 
-  test:
-    timeout-minutes: 30
-    name: Tests
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest]
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
+            - run: npm run compile-webviews
+              name: npm run compile-webviews
 
-      - name: Use Node ${{env.NODE_VERSION}}
-        uses: actions/setup-node@v2.1.5
-        with:
-          node-version: ${{env.NODE_VERSION}}
+    test:
+        timeout-minutes: 30
+        name: Tests
+        runs-on: ${{ matrix.os }}
+        strategy:
+            fail-fast: false
+            matrix:
+                os: [ubuntu-latest]
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v2
 
-      - run: npm install
-        name: npm install
+            - name: Use Node ${{env.NODE_VERSION}}
+              uses: actions/setup-node@v2.1.5
+              with:
+                  node-version: ${{env.NODE_VERSION}}
 
-      - run: npm run compile
-        name: npm run compile
+            - run: npm install
+              name: npm install
 
-      - run: npm run test-compile
-        name: npm run test-compile
-      
-      - name: Run tests using xvfb
-        env:
-          DISPLAY: 10
-        uses: GabrielBB/xvfb-action@v1.4
-        id: test_id
-        with:
-          run: npm run test
+            - run: npm run compile
+              name: npm run compile
+
+            - run: npm run compile-tests
+              name: npm run compile-tests
+
+            - name: Run tests using xvfb
+              env:
+                  DISPLAY: 10
+              uses: GabrielBB/xvfb-action@v1.4
+              id: test_id
+              with:
+                  run: npm run test
