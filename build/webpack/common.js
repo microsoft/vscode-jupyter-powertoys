@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 'use strict';
 
+const constants = require('../constants');
 const glob = require('glob');
 const path = require('path');
 const webpack_bundle_analyzer = require('webpack-bundle-analyzer');
