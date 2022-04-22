@@ -204,7 +204,7 @@ export function getDisplayNameOrNameOfKernelConnection(kernelConnection: KernelC
                     const envName =
                         kernelConnection.interpreter.envName ||
                         (kernelConnection.interpreter.envPath
-                            ? path.basename(kernelConnection.interpreter.envPath)
+                            ? path.basename(kernelConnection.interpreter.envPath.fsPath)
                             : '');
                     if (envName) {
                         const version = kernelConnection.interpreter.version
@@ -272,7 +272,7 @@ class KernelSpecTreeItem extends TreeItem {
                     : '';
                 break;
             case 'startUsingPythonInterpreter':
-                this.description = getDisplayPath(data.kernelConnectionMetadata.interpreter.path);
+                this.description = getDisplayPath(data.kernelConnectionMetadata.interpreter.uri.fsPath);
                 break;
             default:
                 break;
@@ -341,7 +341,7 @@ class ActiveLocalOrRemoteKernelConnectionTreeItem extends TreeItem {
 }
 export class KernelTreeView implements TreeDataProvider<Node> {
     public readonly _onDidChangeTreeData = new EventEmitter<void | Node | null | undefined>();
-    private cachedKernels?: KernelConnectionMetadata[];
+    private cachedKernels?: (KernelConnectionMetadata & { displayName: string })[];
     private readonly disposables: Disposable[] = [];
     private readonly remoteBaseUrls = new Set<string>();
     private groupBy?: 'language' | 'PythonVersion' | 'EnvironmentType' = 'language';
@@ -400,7 +400,19 @@ export class KernelTreeView implements TreeDataProvider<Node> {
     }
     public async getChildren(element?: Node): Promise<Node[]> {
         if (!element) {
-            this.cachedKernels = await this.kernelService.getKernelSpecifications();
+            this.cachedKernels = (await this.kernelService.getKernelSpecifications()).map((k) => {
+                try {
+                    return {
+                        ...k,
+                        displayName: getDisplayNameOrNameOfKernelConnection(k)
+                    };
+                } catch (ex) {
+                    return {
+                        ...k,
+                        displayName: 'error'
+                    };
+                }
+            });
             const uniqueKernelIds = new Set<string>();
             this.cachedKernels = this.cachedKernels.filter((item) => {
                 if (uniqueKernelIds.has(item.id)) {
@@ -411,9 +423,7 @@ export class KernelTreeView implements TreeDataProvider<Node> {
                 uniqueKernelIds.add(item.id);
                 return true;
             });
-            this.cachedKernels.sort((a, b) =>
-                getDisplayNameOrNameOfKernelConnection(a).localeCompare(getDisplayNameOrNameOfKernelConnection(b))
-            );
+            this.cachedKernels.sort((a, b) => a.displayName?.localeCompare(b.displayName || ''));
             this.remoteBaseUrls.clear();
             this.cachedKernels.forEach((item) => {
                 if (!isLocalKernelConnection(item)) {
