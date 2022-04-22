@@ -162,6 +162,12 @@
                 "icon": "$(window)"
             },
             {
+                "command": "jupyter.notebookeditor.openContextualHelp",
+                "title": "%jupyter.command.jupyter.openContextualHelp.title%",
+                "category": "Notebook",
+                "enablement": "notebookType == jupyter-notebook && isWorkspaceTrusted && jupyter.ispythonnotebook"
+            },
+            {
                 "command": "jupyter-kernelManager.editKernelSpec",
                 "title": "Edit KernelSpec",
                 "category": "Notebook",
@@ -219,6 +225,12 @@
                     "command": "jupyter-kernelManager.shutdownKernel",
                     "group": "Notebook",
                     "when": "config.jupyter.kernelManagement.enabled && false && (jupyter.ispythonorinteractiveeactive || jupyter.isnativeactive)"
+                },
+                {
+                    "command": "jupyter.notebookeditor.openContextualHelp",
+                    "title": "%jupyter.command.jupyter.openContextualHelp.title%",
+                    "category": "Notebook",
+                    "enablement": "isWorkspaceTrusted && jupyter.ispythonnotebook && config.jupyter.contextualHelp.enabled"
                 }
             ],
             "notebook/toolbar": [
@@ -355,6 +367,12 @@
                     "id": "jupyterKernelsView",
                     "name": "Kernels",
                     "when": "!jupyter.hasKernels && config.jupyter.kernelManagement.enabled"
+                },
+                {
+                    "type": "webview",
+                    "id": "jupyterContextualHelp",
+                    "name": "Contextual Help",
+                    "when": "config.jupyter.contextualHelp.enabled"
                 }
             ]
         },
@@ -403,20 +421,39 @@
                         "default": true,
                         "description": "Enable the Kernel Management feature providing ability to start/stop/interrupt kernels.",
                         "scope": "machine"
+                    },
+                    "jupyter.contextualHelp.enabled": {
+                        "type": "boolean",
+                        "default": true,
+                        "description": "Enable the contextual help feature.",
+                        "scope": "machine"
+                    },
+                    "jupyter.contextualHelp.detailLevel": {
+                        "type": "string",
+                        "default": "normal",
+                        "enum": [
+                            "normal",
+                            "verbose"
+                        ],
+                        "description": "Level of help to provide",
+                        "scope": "application"
                     }
                 }
             }
         ]
     },
     "scripts": {
-        "vscode:prepublish": "npm run esbuild-base -- --minify",
-        "esbuild-base": "esbuild ./src/extension.ts --bundle --outfile=out/main.js --external:vscode --format=cjs --platform=node",
-        "build": "npm run -S esbuild-base -- --sourcemap",
-        "watch": "npm run -S esbuild-base -- --sourcemap --watch",
-        "compile": "npm run build",
-        "test-compile": "tsc -p ./",
-        "test": "node ./out/test/runTest.js",
+        "vscode:prepublish": "npm run clean && npm run compile-webviews && npm run compile",
+        "compile": "webpack --config ./webpack.config.js",
+        "compile-webviews-watch": "webpack --config ./build/webpack/webpack.ui.config.js --watch",
+        "compile-webviews": "webpack --config ./build/webpack/webpack.ui.config.js",
+        "watch": "webpack --watch",
+        "clean": "del-cli out/**",
+        "compile-tests": "tsc -p . --outDir out",
+        "watch-tests": "tsc -p . -w --outDir out",
+        "pretest": "npm run compile-tests && npm run compile && npm run lint",
         "lint": "eslint src --ext ts",
+        "test": "node ./out/test/runTest.js",
         "postinstall": "npm run download-api",
         "download-api": "vscode-dts dev",
         "postdownload-api": "vscode-dts main",
@@ -424,24 +461,61 @@
         "kill-compiled": "deemon --kill npm run watch"
     },
     "devDependencies": {
+        "@nteract/transforms": "^5.0.4-alpha.0",
+        "@types/fs-extra": "^9.0.13",
         "@types/glob": "^7.1.4",
+        "@types/loadable__component": "^5.13.4",
+        "@types/lodash": "^4.14.178",
         "@types/mocha": "^9.0.0",
         "@types/node": "16.11.07",
+        "@types/react-dom": "^17.0.11",
+        "@types/redux-logger": "^3.0.9",
         "@typescript-eslint/eslint-plugin": "^5.1.0",
         "@typescript-eslint/parser": "^5.1.0",
         "@vscode/test-electron": "^1.6.2",
+        "babel-polyfill": "^6.26.0",
+        "copy-webpack-plugin": "^10.2.0",
+        "cross-env": "^7.0.3",
         "crypto": "^1.0.1",
+        "css-loader": "^6.5.1",
         "deemon": "^1.6.0",
+        "del-cli": "^4.0.1",
         "esbuild": "^0.14.36",
         "eslint": "^8.1.0",
+        "fork-ts-checker-webpack-plugin": "^6.5.0",
         "glob": "^7.1.7",
+        "html-webpack-plugin": "^5.5.0",
+        "less-loader": "^10.2.0",
         "mocha": "^9.1.3",
+        "path-browserify": "^1.0.1",
+        "thread-loader": "^3.0.4",
+        "ts-loader": "^9.2.5",
+        "tslib": "^2.3.1",
         "typescript": "^4.4.4",
-        "vscode-dts": "^0.3.3"
+        "webpack": "^5.52.1",
+        "webpack-bundle-analyzer": "^4.5.0",
+        "webpack-cli": "^4.8.0",
+        "webpack-fix-default-import-plugin": "^1.0.3"
     },
     "dependencies": {
+        "@jupyterlab/coreutils": "^5.2.5",
+        "@jupyterlab/nbformat": "^3.2.5",
         "@jupyterlab/services": "^6.3.2",
+        "@loadable/component": "^5.15.2",
+        "ansi-regex": "^6.0.1",
+        "ansi-to-html": "^0.7.2",
+        "crypto": "^1.0.1",
         "fs-extra": "^10.0.1",
+        "jsonc-parser": "^3.0.0",
+        "less": "^4.1.2",
+        "lodash": "^4.17.21",
+        "log4js": "^6.3.0",
+        "react": "^16.5.2",
+        "react-dom": "^16.5.2",
+        "react-redux": "^7.1.1",
+        "redux-logger": "^3.0.6",
+        "rxjs": "^6.5.4",
+        "style-loader": "^3.3.1",
         "untildify": "^4.0.0"
     }
 }

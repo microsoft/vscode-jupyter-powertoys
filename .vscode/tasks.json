@@ -1,22 +1,50 @@
 // See https://go.microsoft.com/fwlink/?LinkId=733558
 // for the documentation about the tasks.json format
 {
-	"version": "2.0.0",
-	"tasks": [
-		{
-			"type": "npm",
-			"script": "watch",
-			"group": { "kind": "build", "isDefault": true },
-			"problemMatcher": "$esbuild-watch",
-			"isBackground": true,
-			"label": "npm: watch",
-		},
-		{
-			"type": "npm",
-			"script": "build",
-			"group": "build",
-			"problemMatcher": "$esbuild",
-			"label": "npm: build",
-		}
-	] 
+    "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+    },
+    "tasks": [
+        {
+            "label": "Compile",
+            "type": "npm",
+            "script": "watch",
+            "isBackground": true,
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": ["$tsc-watch", "$ts-checker-webpack-watch"]
+        },
+        {
+            "label": "Compile Web Views",
+            "type": "npm",
+            "script": "compile-webviews-watch",
+            "isBackground": true,
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": ["$tsc-watch", "$ts-checker-webpack-watch"]
+        },
+        {
+            "type": "npm",
+            "script": "watch-tests",
+            "problemMatcher": "$tsc-watch",
+            "isBackground": true,
+            "presentation": {
+                "reveal": "never",
+                "group": "watchers"
+            },
+            "group": "build"
+        },
+        {
+            "label": "tasks: watch-tests",
+            "dependsOn": ["npm: watch", "npm: watch-tests"],
+            "problemMatcher": []
+        }
+    ]
 }
