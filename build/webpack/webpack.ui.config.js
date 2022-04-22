@@ -9,7 +9,6 @@ const common = require('./common');
 const webpack = require('webpack');
 const constants = require('../constants');
 const path = require('path');
-const CopyWebpackPlugin = require('copy-webpack-plugin');
 const configFileName = 'tsconfig.ui.json';
 const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 
