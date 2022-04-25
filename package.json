@@ -13,6 +13,11 @@
         "type": "git",
         "url": "https://github.com/Microsoft/vscode-jupyter-powertoys"
     },
+    "icon": "icon.png",
+    "galleryBanner": {
+        "color": "#ffffff",
+        "theme": "light"
+    },
     "bugs": {
         "url": "https://github.com/Microsoft/vscode-jupyter-powertoys/issues"
     },
