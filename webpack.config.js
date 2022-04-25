@@ -40,6 +40,10 @@ const extensionConfig = {
                         }
                     }
                 ]
+            },
+            {
+                test: /\.svg$/,
+                use: ['svg-inline-loader']
             }
         ]
     },
