@@ -24,7 +24,7 @@
     "qna": "https://github.com/microsoft/vscode-jupyter-powertoys/discussions",
     "version": "0.0.1",
     "engines": {
-        "vscode": "^1.65.0"
+        "vscode": "^1.67.0"
     },
     "extensionDependencies": [
         "ms-toolsai.jupyter"
