@@ -623,7 +623,6 @@ export class KernelTreeView implements TreeDataProvider<Node> {
                     const remoteActiveKernelStartedUsingConnectToRemoveKernelSpec = remoteActiveKernels.filter(
                         (item) => item.metadata.kind === 'startUsingRemoteKernelSpec'
                     );
-                    debugger;
                     const activeRemoteKernelNodes: IActiveRemoteKernelTreeNode[] = [];
                     const uniqueKernelIds = new Set<string>();
                     await Promise.all(
