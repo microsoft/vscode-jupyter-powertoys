@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 'use strict';
 
-import * as path from 'path';
 import {
     Event,
     EventEmitter,
@@ -14,7 +13,6 @@ import {
 import { IWebview, IWebviewOptions, WebviewMessage } from '../../types';
 import { logError } from '../../common/logging';
 import { getFiles, localFileExists } from '../../common/files';
-import { Identifiers } from '../../constants';
 
 // Wrapper over a vscode webview. To be used with either WebviewPanel or WebviewView
 export abstract class Webview implements IWebview {
@@ -93,8 +91,6 @@ export abstract class Webview implements IWebview {
                 }; default-src 'unsafe-inline' 'unsafe-eval' data: https: http: blob: ${
             this.webviewHost.webview.cspSource
         };">
-                <meta name="theme-color" content="#000000">
-                <meta name="theme" content="${Identifiers.GeneratedThemeName}"/>
                 <title>VS Code Python React UI</title>
                 <base href="${uriBase}${uriBase.endsWith('/') ? '' : '/'}"/>
                 </head>

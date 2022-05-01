@@ -1,0 +1,21 @@
+{
+    "extends": "./tsconfig",
+    "compilerOptions": {
+        "paths": {
+            "*": ["types/*"]
+        }
+    },
+    "exclude": [
+        "node_modules",
+        ".vscode-test",
+        ".vscode test",
+        "build",
+        "out",
+        "tmp",
+        ".nyc_output",
+        ".git",
+        "src/*.node.ts",
+        "src/**/*.node.ts",
+        ".vscode-test-web"
+    ]
+}

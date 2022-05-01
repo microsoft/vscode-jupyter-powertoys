@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 import { languages, Uri, WorkspaceFolder } from 'vscode';
-import * as path from 'path';
+import * as path from '../vscode-path/path';
 import { languageAliases, languages as knownLanguages } from './languages';
 // eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-require-imports
 const untildify = require('untildify');

@@ -46,6 +46,17 @@
             "label": "tasks: watch-tests",
             "dependsOn": ["npm: watch", "npm: watch-tests"],
             "problemMatcher": []
+        },
+        {
+            "label": "Compile Web Extension",
+            "type": "npm",
+            "script": "compile-web-watch",
+            "isBackground": true,
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": ["$ts-webpack-watch"]
         }
     ]
 }
