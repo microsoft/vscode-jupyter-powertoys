@@ -4,6 +4,10 @@ This Visual Studio Code extension provides experimental features to extend the J
 
 This extension is intended to supplement the features provided by the main [Jupyter extension](https://marketplace.visualstudio.com/items?itemName=ms-toolsai.jupyter). As this extension is providing experimental features, there is no set roadmap for how features will be added or removed from it. Features may be added or removed at any time and there is no guarantee of future support by virtue of inclusion in the extension now. Features in this extension that see high usage may be considered for removal from this extension and inclusion in the main Jupyter VS Code extension. In that case, best efforts will be made to notify of the change and migrate settings if possible.
 
+If these tools aren't quite satisfying your need for something new and cool, also be sure to checkout these other standalone Jupyter Extension addons:
+* [Gather](https://marketplace.visualstudio.com/items?itemName=ms-python.gather) - Quickly extract tidy scripts or notebooks from your mess of experimentation.
+* [Pyodide Kernel](https://marketplace.visualstudio.com/items?itemName=joyceerhl.vscode-pyodide) - Yes, you can run Python in [the browser](https://vscode.dev) without the need to install or configure any Jupyter server! 
+
 ## Contributing
 
 This project uses GitHub Issues to track bugs and feature requests. Please search the existing 
