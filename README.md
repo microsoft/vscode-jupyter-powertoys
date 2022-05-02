@@ -6,8 +6,8 @@ This extension is intended to supplement the features provided by the main [Jupy
 
 ## Contributing
 
-This project uses GitHub Issues to track bugs and feature requests. Please search the existing 
-issues before filing new issues to avoid duplicates.  For new issues, file your bug or 
+This project uses GitHub Issues to track bugs and feature requests. Please search the existing
+issues before filing new issues to avoid duplicates. For new issues, file your bug or
 feature request as a [new Issue](https://github.com/microsoft/vscode-jupyter-powertoys/issues).
 
 For help and questions about using this project, please start a Discussion on our [GitHub Discussions page](https://github.com/microsoft/vscode-jupyter-powertoys/discussions).
@@ -18,8 +18,8 @@ These are experimental features, so support for help and bug fixing regarding th
 
 ## Trademarks
 
-This project may contain trademarks or logos for projects, products, or services. Authorized use of Microsoft 
-trademarks or logos is subject to and must follow 
+This project may contain trademarks or logos for projects, products, or services. Authorized use of Microsoft
+trademarks or logos is subject to and must follow
 [Microsoft's Trademark & Brand Guidelines](https://www.microsoft.com/en-us/legal/intellectualproperty/trademarks/usage/general).
 Use of Microsoft trademarks or logos in modified versions of this project must not cause confusion or imply Microsoft sponsorship.
 Any use of third-party trademarks or logos are subject to those third-party's policies.
@@ -38,3 +38,10 @@ The notebook run groups feature provides the ability to group notebook cells int
 executed as a group together. The `Jupyter > Notebook Run Groups > Group Count` setting controls the number of these groups available, from one to three. Icons to add or remove cells from groups are added to the toolbar of each notebook cell. Cell groups can be executed via the command palette, optional icons in the cell toolbar, or from the dropdown on the cell run button.
 
 <img src=https://raw.githubusercontent.com/microsoft/vscode-jupyter-powertoys/main/images/README/NotebookRunGroups.gif?>
+
+### Contextual Help
+
+Contextual help is a window that provides help text returned by the kernel when changing cursor position in a notebook.
+<img src=https://raw.githubusercontent.com/microsoft/vscode-jupyter-powertoys/main/images/README/contextualHelp.gif?>
+
+The amount of help text can be controlled with the `jupyter.contextualHelp.detailLevel` setting.
