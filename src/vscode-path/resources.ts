@@ -1,4 +1,3 @@
-/* eslint-disable local-rules/dont-use-fspath */
 /* eslint-disable @typescript-eslint/no-use-before-define */
 /*---------------------------------------------------------------------------------------------
  *  Copyright (c) Microsoft Corporation. All rights reserved.
