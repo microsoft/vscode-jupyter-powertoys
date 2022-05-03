@@ -35,11 +35,6 @@ export class ContextualPanel extends React.Component<IContextualPanelProps> {
     }
 
     public render() {
-        const dynamicFont: React.CSSProperties = {
-            fontSize: this.props.font.size,
-            fontFamily: this.props.font.family
-        };
-
         // If we're hiding the UI, just render the empty string
         if (this.props.hideUI) {
             return (
@@ -54,7 +49,7 @@ export class ContextualPanel extends React.Component<IContextualPanelProps> {
         const progressBar = this.props.busy || !this.props.loaded ? <Progress /> : undefined;
 
         return (
-            <div id="main-panel" role="Main" style={dynamicFont}>
+            <div id="main-panel" role="Main">
                 <div className="styleSetter">
                     <style>{`${this.props.rootCss ? this.props.rootCss : ''}`}</style>
                 </div>

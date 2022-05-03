@@ -5,11 +5,11 @@ import {
     IActiveLocalKernelTreeNode,
     IActiveRemoteKernelTreeNode,
     IKernelSpecTreeNode,
-    ipynbNameToTemporarilyStartKernel,
+    iPyNbNameToTemporarilyStartKernel,
     KernelTreeView
 } from './kernelTreeView';
 import { IExportedKernelService } from './vscodeJupyter';
-import * as path from 'path';
+import * as path from '../vscode-path/path';
 
 export class CommandHandler {
     private readonly disposables: Disposable[] = [];
@@ -42,7 +42,10 @@ export class CommandHandler {
             commands.registerCommand(
                 'jupyter-kernelManager.refreshKernels',
                 async () => {
-                    await this.kernelService.getKernelSpecifications(true);
+                    await Promise.all([
+                        this.kernelService.getKernelSpecifications(true),
+                        this.kernelService.getActiveKernels()
+                    ]);
                     KernelTreeView.refresh();
                 },
                 this
@@ -59,7 +62,8 @@ export class CommandHandler {
                 kernel &&
                 activeKernels.find(
                     (item) =>
-                        item.kind === 'connectToLiveKernel' && item.kernelModel.id === kernel?.connection.connection.id
+                        item.kind === 'connectToLiveRemoteKernel' &&
+                        item.kernelModel.id === kernel?.connection.connection.id
                 );
             if (activeKernelSpecConnection) {
                 void commands.executeCommand('jupyter.createnewinteractive', activeKernelSpecConnection);
@@ -196,7 +200,7 @@ export class CommandHandler {
                 const filePath = path.join(
                     workspaceFolder.fsPath,
                     a.kernelConnectionMetadata.id,
-                    ipynbNameToTemporarilyStartKernel
+                    iPyNbNameToTemporarilyStartKernel
                 );
                 const kernel = await this.kernelService.startKernel(a.kernelConnectionMetadata, Uri.file(filePath));
                 return kernel.connection;

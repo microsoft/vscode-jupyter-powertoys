@@ -38,10 +38,6 @@ export interface ICellViewModel {
     cursorPos: CursorPos | IEditorPosition;
 }
 
-export interface IFont {
-    size: number;
-    family: string;
-}
 export enum CursorPos {
     Top,
     Bottom,
@@ -64,7 +60,6 @@ export type IMainState = {
     submittedText: boolean;
     rootStyle?: string;
     rootCss?: string;
-    font: IFont;
     vscodeThemeName?: string;
     baseTheme: string;
     monacoTheme?: string;

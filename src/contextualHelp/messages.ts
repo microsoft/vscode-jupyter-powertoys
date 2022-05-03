@@ -78,24 +78,10 @@ export interface IEditorContentChange {
     readonly position: IEditorPosition;
 }
 
-export enum CssMessages {
-    GetCssRequest = 'get_css_request',
-    GetCssResponse = 'get_css_response'
-}
-
 export enum SharedMessages {
     UpdateSettings = 'update_settings',
     Started = 'started',
     LocInit = 'loc_init'
-}
-
-export interface IGetCssRequest {
-    isDark: boolean;
-}
-
-export interface IGetCssResponse {
-    css: string;
-    theme: string;
 }
 
 export interface IFinishCell {
@@ -132,8 +118,6 @@ export class MessageMapping {
     public [WindowMessages.FinishCell]: IFinishCell;
     public [WindowMessages.UpdateCellWithExecutionResults]: ICell;
     public [WindowMessages.OpenSettings]: string | undefined;
-    public [CssMessages.GetCssRequest]: IGetCssRequest;
-    public [CssMessages.GetCssResponse]: IGetCssResponse;
     public [SharedMessages.UpdateSettings]: string;
     public [SharedMessages.LocInit]: string;
     public [WindowMessages.ConvertUriForUseInWebViewRequest]: Uri;

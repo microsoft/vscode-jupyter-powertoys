@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+/* eslint-disable */
 
 import { CancellationToken, Event, Uri } from 'vscode';
 import type { Kernel } from '@jupyterlab/services/lib/kernel';
@@ -171,20 +172,28 @@ interface IJupyterKernel {
 }
 
 export type LiveKernelModel = IJupyterKernel &
-    Partial<IJupyterKernelSpec> & { model: Session.IModel | undefined; notebook?: { path?: string } };
+    Partial<IJupyterKernelSpec> & {
+        model: Session.IModel | undefined;
+        notebook?: { path?: string };
+        lastActivityTime?: string;
+        last_activity?: string;
+        execution_state?: string;
+        connections?: number;
+        numberOfConnections?: number;
+    };
 
 /**
  * Connection metadata for Live Kernels.
  * With this we are able connect to an existing kernel (instead of starting a new session).
  */
-export type LiveKernelConnectionMetadata = Readonly<{
+export type LiveRemoteKernelConnectionMetadata = Readonly<{
     kernelModel: LiveKernelModel;
     /**
      * Python interpreter will be used for intellisense & the like.
      */
     interpreter?: PythonEnvironment;
     baseUrl: string;
-    kind: 'connectToLiveKernel';
+    kind: 'connectToLiveRemoteKernel';
     id: string;
 }>;
 
@@ -193,9 +202,7 @@ export type KernelConnectionMetadata =
     | RemoteKernelSpecConnectionMetadata
     | PythonKernelConnectionMetadata
     | LiveRemoteKernelConnectionMetadata;
-
-export type LiveRemoteKernelConnectionMetadata = LiveKernelConnectionMetadata;
-export type ActiveKernel = LiveKernelConnectionMetadata;
+export type ActiveKernel = LiveRemoteKernelConnectionMetadata;
 
 export interface IKernelSocket {
     /**
@@ -261,9 +268,11 @@ export interface IExportedKernelService {
      */
     getKernelSpecifications(refresh?: boolean): Promise<KernelConnectionMetadata[]>;
     /**
-     * Gets a list of all active kernel connections associated with a resource.
+     * Gets a list of all active kernel connections.
+     * If `uri` is undefined, then the kernel is not associated with any resource. I.e its currently not associated with any notebook in Jupyter extension.
+     * If `uri` is undefined, then the kernel is associated with the resource identified by the Uri.
      */
-    getActiveKernels(): Promise<{ metadata: KernelConnectionMetadata; uri: Uri }[]>;
+    getActiveKernels(): Promise<{ metadata: KernelConnectionMetadata; uri: Uri | undefined }[]>;
     /**
      * Gets the Kernel connection & the metadata that's associated with a given resource.
      * (only successfully started/active connections are returned).
