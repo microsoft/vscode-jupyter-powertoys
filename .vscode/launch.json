@@ -11,7 +11,7 @@
             "request": "launch",
             "args": ["--extensionDevelopmentPath=${workspaceFolder}", "--enable-proposed-api"],
             "outFiles": ["${workspaceFolder}/out/**/*.js"],
-            // "preLaunchTask": "Compile",
+            "preLaunchTask": "Compile",
             "presentation": {
                 "group": "1_extension",
                 "order": 1
