@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 'use strict';
-import { CssMessages, WindowMessages } from '../../../../messages';
+import { WindowMessages } from '../../../../messages';
 import { CommonEffects } from '../../../common/redux/reducers/commonEffects';
 import { Transfer } from '../../../common/redux/reducers/transfer';
 import { CommonActionType } from '../../../common/redux/reducers/types';
@@ -36,6 +36,5 @@ export const reducerMap: Partial<INativeEditorActionMapping> = {
     [WindowMessages.LoadAllCells]: Creation.loadAllCells,
     [WindowMessages.StartProgress]: CommonEffects.startProgress,
     [WindowMessages.StopProgress]: CommonEffects.stopProgress,
-    [CssMessages.GetCssResponse]: CommonEffects.handleCss,
     [WindowMessages.HideUI]: Effects.hideUI
 };

@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 'use strict';
-import { CssMessages, WindowMessages } from '../../../../messages';
+import { WindowMessages } from '../../../../messages';
 import { IMainState } from '../../types';
 import { postActionToExtension } from '../helpers';
 import {
@@ -13,7 +13,6 @@ export namespace Transfer {
     export function started(arg: CommonReducerArg): IMainState {
         // Send all of our initial requests
         postActionToExtension(arg, WindowMessages.Started);
-        postActionToExtension(arg, CssMessages.GetCssRequest, { isDark: arg.prevState.baseTheme !== 'vscode-light' });
         return arg.prevState;
     }
 

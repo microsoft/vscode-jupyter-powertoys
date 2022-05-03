@@ -3,7 +3,7 @@
 'use strict';
 import * as Redux from 'redux';
 import { createLogger } from 'redux-logger';
-import { CssMessages, MessageType, WindowMessages } from '../../../messages';
+import { MessageType, WindowMessages } from '../../../messages';
 import { PostOffice } from '../postOffice';
 import { IMainState } from '../types';
 import { postActionToExtension, isAllowedAction, isAllowedMessage } from './helpers';
@@ -28,10 +28,6 @@ function generateDefaultState(baseTheme: string): IMainState {
         knownDark: false,
         dirty: false,
         isAtBottom: true,
-        font: {
-            size: 14,
-            family: "Consolas, 'Courier New', monospace"
-        },
         codeTheme: 'ipython-theme',
         focusPending: 0,
         loaded: false,
@@ -102,7 +98,6 @@ function createMiddleWare(
 
     // Create the logger if we're not in production mode or we're forcing logging
     const reduceLogMessage = '<payload too large to displayed in logs (at least on CI)>';
-    const actionsWithLargePayload = [CssMessages.GetCssResponse];
     const logger = createLogger({
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         stateTransformer: (state: any) => {
@@ -125,9 +120,6 @@ function createMiddleWare(
         actionTransformer: (action: any) => {
             if (!action) {
                 return action;
-            }
-            if (actionsWithLargePayload.indexOf(action.type) >= 0) {
-                return { ...action, payload: reduceLogMessage };
             }
             return action;
         },
