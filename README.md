@@ -49,3 +49,10 @@ Contextual help is a window that provides help text returned by the kernel when 
 <img src=https://raw.githubusercontent.com/microsoft/vscode-jupyter-powertoys/main/images/README/contextualHelp.gif?>
 
 The amount of help text can be controlled with the `jupyter.contextualHelp.detailLevel` setting.
+
+### Kernel Management panel
+
+List, start, stop, reset, kernels all from a new convenient Jupyter sidebar.
+
+![Recording 2022-05-05 at 17 37 21](https://user-images.githubusercontent.com/11685408/167048370-6f71bb21-555f-412a-b2c8-ca0270232fd1.gif)
+
