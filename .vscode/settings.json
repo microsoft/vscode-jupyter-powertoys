@@ -7,5 +7,16 @@
         "out": true // set this to false to include "out" folder in search results
     },
     // Turn off tsc task auto detection since we have the necessary tasks as npm scripts
-    "typescript.tsc.autoDetect": "off"
+    "typescript.tsc.autoDetect": "off",
+    "typescript.preferences.quoteStyle": "single",
+    "javascript.preferences.quoteStyle": "single",
+    "typescriptHero.imports.stringQuoteStyle": "'",
+    "prettier.printWidth": 120,
+    "prettier.singleQuote": true,
+    "editor.codeActionsOnSave": {
+        "source.fixAll.eslint": true,
+        "source.fixAll.tslint": true
+    },
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "typescript.preferences.importModuleSpecifier": "relative"
 }

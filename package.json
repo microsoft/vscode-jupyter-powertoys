@@ -178,6 +178,18 @@
                 "title": "Edit KernelSpec",
                 "category": "Notebook",
                 "icon": "$(json)"
+            },
+            {
+                "command": "jupyter-kernelManager.inspectKernelMessages",
+                "title": "Inspect Kernel Messages",
+                "category": "Notebook",
+                "icon": "$(inspect)"
+            },
+            {
+                "command": "jupyter-kernelManager.clearKernelMessages",
+                "title": "Clear",
+                "category": "Notebook",
+                "icon": "$(clear-all)"
             }
         ],
         "menus": {
@@ -363,6 +375,16 @@
                     "command": "jupyter-kernelManager.editKernelSpec",
                     "when": "view == jupyterKernelsView && viewItem =~ /:startUsingLocalKernelSpec/",
                     "group": "inline"
+                },
+                {
+                    "command": "jupyter-kernelManager.inspectKernelMessages",
+                    "when": "config.jupyter.inspectKernelMessages.enabled && view == jupyterKernelsView && viewItem =~ /activeKernelRoot/",
+                    "group": "inline"
+                },
+                {
+                    "command": "jupyter-kernelManager.clearKernelMessages",
+                    "when": "config.jupyter.inspectKernelMessages.enabled && view == jupyterKernelsView && viewItem =~ /kernelMessagesRoot/",
+                    "group": "inline"
                 }
             ]
         },
@@ -426,6 +448,12 @@
                         "type": "boolean",
                         "default": true,
                         "description": "Enable the Kernel Management feature providing ability to start/stop/interrupt kernels.",
+                        "scope": "machine"
+                    },
+                    "jupyter.inspectKernelMessages.enabled": {
+                        "type": "boolean",
+                        "default": false,
+                        "description": "Provides the ability to inspect messages sent to and from the kernel.",
                         "scope": "machine"
                     },
                     "jupyter.contextualHelp.enabled": {

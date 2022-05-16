@@ -1,24 +1,19 @@
-// Copyright (c) Microsoft Corporation.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-// The module 'vscode' contains the VS Code extensibility API
-// Import the module and reference it with the alias vscode in your code below
-import { extensions, workspace } from 'vscode';
-import type { ExtensionContext } from 'vscode';
-import { JupyterAPI } from './vscodeJupyter';
-import { KernelTreeView } from './kernelTreeView';
-import { initializeKnownLanguages } from './utils';
-import { CommandHandler } from './commandHandler';
+
+import { ActiveKernelChildNodesProviderRegistry } from '../kernelManager/kernelChildNodeProvider';
+import { commands, ExtensionContext, extensions, workspace } from 'vscode';
+import { ActiveKernelMessageProvider } from './kernelMessageProvider';
+import { JupyterAPI } from '../kernelManager/vscodeJupyter';
 
 let activated = false;
-// this method is called when your extension is activated
-// your extension is activated the very first time the command is executed
+
 export async function activate(context: ExtensionContext) {
     async function activateFeature() {
         if (activated) {
             return;
         }
         activated = true;
-        void initializeKnownLanguages();
         const jupyterExt = extensions.getExtension<JupyterAPI>('ms-toolsai.jupyter');
         if (!jupyterExt) {
             return;
@@ -28,11 +23,18 @@ export async function activate(context: ExtensionContext) {
         if (!kernelService) {
             return;
         }
-        CommandHandler.register(kernelService, context);
-        KernelTreeView.register(kernelService, context.subscriptions);
-    }
+        const provider = new ActiveKernelMessageProvider(kernelService);
+        ActiveKernelChildNodesProviderRegistry.instance.registerProvider(provider);
+        context.subscriptions.push(provider);
 
-    if (workspace.getConfiguration('jupyter').get('kernelManagement.enabled')) {
+        commands.registerCommand('jupyter-kernelManager.inspectKernelMessages', () => {
+            provider.activate();
+        });
+    }
+    if (
+        workspace.getConfiguration('jupyter').get('inspectKernelMessages.enabled') &&
+        workspace.getConfiguration('jupyter').get('kernelManagement.enabled')
+    ) {
         await activateFeature();
         return;
     }
@@ -40,6 +42,7 @@ export async function activate(context: ExtensionContext) {
         (e) => {
             if (
                 e.affectsConfiguration('jupyter') &&
+                workspace.getConfiguration('jupyter').get('inspectKernelMessages.enabled') &&
                 workspace.getConfiguration('jupyter').get('kernelManagement.enabled')
             ) {
                 activateFeature().catch((ex) => console.error('Failed to activate kernel management feature', ex));
@@ -49,6 +52,3 @@ export async function activate(context: ExtensionContext) {
         context.subscriptions
     );
 }
-
-// this method is called when your extension is deactivated
-export function deactivate() {}
