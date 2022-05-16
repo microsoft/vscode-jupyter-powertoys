@@ -33,6 +33,9 @@ jobs:
             - run: npm run compile
               name: npm run compile
 
+            - run: npm run compile-web
+              name: npm run compile-web
+
             - run: npm run compile-webviews
               name: npm run compile-webviews
 

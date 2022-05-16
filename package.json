@@ -22,7 +22,7 @@
         "url": "https://github.com/Microsoft/vscode-jupyter-powertoys/issues"
     },
     "qna": "https://github.com/microsoft/vscode-jupyter-powertoys/discussions",
-    "version": "0.0.2",
+    "version": "0.0.3",
     "engines": {
         "vscode": "^1.67.0"
     },
@@ -477,7 +477,7 @@
         ]
     },
     "scripts": {
-        "vscode:prepublish": "npm run clean && npm run compile-webviews && npm run compile",
+        "vscode:prepublish": "npm run clean && npm run compile-webviews && npm run compile && npm run compile-web",
         "compile": "webpack --config ./webpack.config.js",
         "compile-webviews-watch": "webpack --config ./build/webpack/webpack.ui.config.js --watch",
         "compile-webviews": "webpack --config ./build/webpack/webpack.ui.config.js",
