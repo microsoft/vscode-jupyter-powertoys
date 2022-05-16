@@ -261,7 +261,7 @@ export interface IExportedKernelService {
     /**
      * Gets a list of all active kernel connections associated with a resource.
      */
-    getActiveKernels(): Promise<{ metadata: KernelConnectionMetadata; uri: Uri }[]>;
+    getActiveKernels(): { metadata: KernelConnectionMetadata; uri: Uri }[];
     /**
      * Gets the Kernel connection & the metadata that's associated with a given resource.
      * (only successfully started/active connections are returned).

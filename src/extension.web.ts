@@ -12,9 +12,7 @@ export async function activate(context: vscode.ExtensionContext) {
     if (vscode.workspace.getConfiguration('jupyter').get('notebookRunGroups.enabled')) {
         activateNotebookRunGroups(context);
     }
-    if (vscode.workspace.getConfiguration('jupyter').get('kernelManagement.enabled')) {
-        await activateKernelManagement(context);
-    }
+    await activateKernelManagement(context);
 }
 
 export function deactivate() {}

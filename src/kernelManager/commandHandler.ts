@@ -1,15 +1,10 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 import { commands, Disposable, ExtensionContext, Uri, window, workspace } from 'vscode';
-import {
-    IActiveLocalKernelTreeNode,
-    IActiveRemoteKernelTreeNode,
-    IKernelSpecTreeNode,
-    iPyNbNameToTemporarilyStartKernel,
-    KernelTreeView
-} from './kernelTreeView';
+import { iPyNbNameToTemporarilyStartKernel, KernelTreeView } from './kernelTreeView';
 import { IExportedKernelService } from './vscodeJupyter';
 import * as path from '../vscode-path/path';
+import { IActiveLocalKernelTreeNode, IActiveRemoteKernelTreeNode, IKernelSpecTreeNode } from './types';
 
 export class CommandHandler {
     private readonly disposables: Disposable[] = [];
@@ -42,10 +37,7 @@ export class CommandHandler {
             commands.registerCommand(
                 'jupyter-kernelManager.refreshKernels',
                 async () => {
-                    await Promise.all([
-                        this.kernelService.getKernelSpecifications(true),
-                        this.kernelService.getActiveKernels()
-                    ]);
+                    await Promise.all([this.kernelService.getKernelSpecifications(true)]);
                     KernelTreeView.refresh();
                 },
                 this

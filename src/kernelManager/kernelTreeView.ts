@@ -1,13 +1,10 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 import * as path from '../vscode-path/path';
-import { ConnectionStatus, IKernelConnection, Status } from '@jupyterlab/services/lib/kernel/kernel';
+import { Status } from '@jupyterlab/services/lib/kernel/kernel';
 import {
-    commands,
     Disposable,
     EventEmitter,
-    languages,
-    NotebookDocument,
     ThemeIcon,
     TreeDataProvider,
     TreeItem,
@@ -18,68 +15,29 @@ import {
 import {
     EnvironmentType,
     IExportedKernelService,
-    IKernelConnectionInfo,
     KernelConnectionMetadata,
     LiveRemoteKernelConnectionMetadata,
     LocalKernelSpecConnectionMetadata,
-    PythonKernelConnectionMetadata,
-    RemoteKernelSpecConnectionMetadata
+    PythonKernelConnectionMetadata
 } from './vscodeJupyter';
 import { getDisplayPath, getLanguageExtension } from './utils';
 import { PYTHON_LANGUAGE } from './constants';
 import { getPythonEnvironmentCategory } from './integration';
+import {
+    Node,
+    IActiveKernelRootTreeNode,
+    IActiveLocalKernelTreeNode,
+    IActiveRemoteKernelTreeNode,
+    IKernelSpecRootTreeNode,
+    IKernelSpecTreeNode,
+    ILanguageTreeNode,
+    IPythonEnvironmentCategoryTreeNode,
+    IServerTreeNode,
+    ICustomNodeFromAnotherProvider
+} from './types';
+import { ActiveKernelChildNodesProviderRegistry, IActiveKernelChildNodesProvider } from './kernelChildNodeProvider';
 
 export const iPyNbNameToTemporarilyStartKernel = '__dummy__.ipynb';
-type Node =
-    | IServerTreeNode
-    | IKernelSpecRootTreeNode
-    | IKernelSpecTreeNode
-    | ILanguageTreeNode
-    | IActiveKernelRootTreeNode
-    | IActiveLocalKernelTreeNode
-    | IActiveRemoteKernelTreeNode
-    | IPythonEnvironmentCategoryTreeNode;
-interface IServerTreeNode {
-    type: 'host';
-    baseUrl?: string;
-}
-
-interface ILanguageTreeNode {
-    type: 'language';
-    baseUrl?: string;
-    language: string;
-}
-interface IPythonEnvironmentCategoryTreeNode {
-    type: 'pythonEnvCategory';
-    category: string;
-}
-
-interface IKernelSpecRootTreeNode {
-    type: 'kernelSpecRoot';
-    baseUrl?: string;
-}
-interface IActiveKernelRootTreeNode {
-    type: 'activeKernelRoot';
-    baseUrl: string;
-}
-export interface IKernelSpecTreeNode {
-    type: 'kernelSpec';
-    kernelConnectionMetadata: KernelConnectionMetadata;
-}
-export interface IActiveLocalKernelTreeNode {
-    type: 'activeLocalKernel';
-    kernelConnectionMetadata: LocalKernelSpecConnectionMetadata | PythonKernelConnectionMetadata;
-    uri: Uri;
-    connection: IKernelConnectionInfo;
-    parent: Node;
-}
-export interface IActiveRemoteKernelTreeNode {
-    type: 'activeRemoteKernel';
-    kernelConnectionMetadata: LiveRemoteKernelConnectionMetadata | RemoteKernelSpecConnectionMetadata;
-    uri?: Uri;
-    connection?: IKernelConnectionInfo;
-    parent: Node;
-}
 
 function getConnectionTitle(baseUrl?: string) {
     return baseUrl ? `Remote Kernels (${baseUrl})` : 'Local Connections';
@@ -283,7 +241,10 @@ class KernelSpecTreeItem extends TreeItem {
 }
 class ActiveLocalOrRemoteKernelConnectionTreeItem extends TreeItem {
     constructor(public readonly data: IActiveLocalKernelTreeNode | IActiveRemoteKernelTreeNode) {
-        super(getDisplayNameOrNameOfKernelConnection(data.kernelConnectionMetadata), TreeItemCollapsibleState.None);
+        super(
+            getDisplayNameOrNameOfKernelConnection(data.kernelConnectionMetadata),
+            TreeItemCollapsibleState.Collapsed
+        );
         if (data.uri && !data.uri.fsPath.endsWith(iPyNbNameToTemporarilyStartKernel)) {
             this.description = path.basename(data.uri.fsPath);
         } else if (data.kernelConnectionMetadata.kind === 'connectToLiveRemoteKernel') {
@@ -379,7 +340,7 @@ export class KernelTreeView implements TreeDataProvider<Node> {
         this.kernelService.onDidChangeKernelSpecifications(
             () => {
                 this.cachedKernels = undefined;
-                this._onDidChangeTreeData.fire();
+                this._onDidChangeTreeData.fire(undefined);
             },
             this,
             this.disposables
@@ -387,7 +348,7 @@ export class KernelTreeView implements TreeDataProvider<Node> {
         this.kernelService.onDidChangeKernels(
             () => {
                 this.cachedKernels = undefined;
-                this._onDidChangeTreeData.fire();
+                this._onDidChangeTreeData.fire(undefined);
             },
             this,
             this.disposables
@@ -413,6 +374,12 @@ export class KernelTreeView implements TreeDataProvider<Node> {
             case 'activeLocalKernel':
             case 'activeRemoteKernel': {
                 return new ActiveLocalOrRemoteKernelConnectionTreeItem(element);
+            }
+            case 'customNodeFromAnotherProvider': {
+                const provider = ActiveKernelChildNodesProviderRegistry.instance.registeredProviders.get(
+                    element.providerId
+                );
+                return provider!.getTreeItem(element);
             }
             default:
                 break;
@@ -604,7 +571,7 @@ export class KernelTreeView implements TreeDataProvider<Node> {
                 if (!this.cachedKernels) {
                     return [];
                 }
-                const activeKernels = await this.kernelService.getActiveKernels();
+                const activeKernels = this.kernelService.getActiveKernels();
                 // const uniqueKernelIds = new Set<string>();
                 // activeKernels = activeKernels.filter((item) => {
                 //     if (uniqueKernelIds.has(item.metadata.id)) {
@@ -734,6 +701,30 @@ export class KernelTreeView implements TreeDataProvider<Node> {
                     return activeLocalKernelNodes;
                 }
             }
+            case 'activeLocalKernel':
+            case 'activeRemoteKernel': {
+                let nodes: ICustomNodeFromAnotherProvider[] = [];
+                Array.from(ActiveKernelChildNodesProviderRegistry.instance.registeredProviders.values()).forEach(
+                    (provider) => {
+                        this.addOnDidProviderNodeChange(provider);
+                        const children = provider.getChildren(element);
+                        nodes = nodes.concat(children);
+                    }
+                );
+                return nodes;
+            }
+            case 'customNodeFromAnotherProvider': {
+                const provider = ActiveKernelChildNodesProviderRegistry.instance.registeredProviders.get(
+                    element.providerId
+                );
+                if (provider) {
+                    this.addOnDidProviderNodeChange(provider);
+                    return provider.getChildren(element);
+                } else {
+                    console.error('Unknown provider for custom nodes', element.providerId);
+                    return [];
+                }
+            }
             default:
                 return [];
         }
@@ -748,6 +739,17 @@ export class KernelTreeView implements TreeDataProvider<Node> {
         };
         const treeView = window.createTreeView<Node>('jupyterKernelsView', options);
         disposables.push(treeView);
+    }
+    private readonly providersAlreadyHandled = new WeakSet<IActiveKernelChildNodesProvider>();
+    private addOnDidProviderNodeChange(provider: IActiveKernelChildNodesProvider) {
+        if (this.providersAlreadyHandled.has(provider)) {
+            return;
+        }
+        this.providersAlreadyHandled.add(provider);
+        if (!provider.onDidChangeTreeData) {
+            return;
+        }
+        provider.onDidChangeTreeData((node) => this._onDidChangeTreeData.fire(node), this, this.disposables);
     }
     private readonly mappedActiveLocalKernelConnections: IActiveLocalKernelTreeNode[] = [];
     private trackKernelConnection(localActiveKernel: IActiveLocalKernelTreeNode) {
