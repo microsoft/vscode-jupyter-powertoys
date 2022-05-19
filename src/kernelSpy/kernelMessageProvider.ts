@@ -66,6 +66,7 @@ class MessageTreeItem extends TreeItem {
             const exec = data.msg as KernelMessage.IExecuteRequestMsg;
             if (data.msg.header.msg_type === 'execute_request' && data.msg.channel === 'shell' && exec.content.code) {
                 this.description = exec.content.code.split('\r\n').join('\\r\\n').split('\n').join('\\n');
+                this.tooltip = exec.content.code;
             }
             const complete = data.msg as KernelMessage.IIsCompleteRequestMsg;
             if (
@@ -74,6 +75,7 @@ class MessageTreeItem extends TreeItem {
                 complete.content.code
             ) {
                 this.description = complete.content.code.split('\r\n').join('\\r\\n').split('\n').join('\\n');
+                this.tooltip = complete.content.code;
             }
             const inspect = data.msg as KernelMessage.IInspectRequestMsg;
             if (
@@ -82,6 +84,7 @@ class MessageTreeItem extends TreeItem {
                 inspect.content.code
             ) {
                 this.description = inspect.content.code.split('\r\n').join('\\r\\n').split('\n').join('\\n');
+                this.tooltip = inspect.content.code;
             }
             const debugRequest = data.msg as KernelMessage.IDebugRequestMsg;
             if (
@@ -89,7 +92,7 @@ class MessageTreeItem extends TreeItem {
                 data.msg.channel === 'control' &&
                 debugRequest.content.command
             ) {
-                const descriptionParts = [`${debugRequest.content.command} (seq: ${debugRequest.content.seq}`];
+                let descriptionParts = [`${debugRequest.content.command} (seq: ${debugRequest.content.seq}`];
                 this.description = `${debugRequest.content.command} (seq: ${debugRequest.content.seq})`;
                 if (
                     (debugRequest.content.command === 'evaluate' ||
@@ -101,6 +104,43 @@ class MessageTreeItem extends TreeItem {
                     this.description = descriptionParts
                         .concat([`, arguments, ${JSON.stringify(debugRequest.content.arguments)})`])
                         .join('');
+                }
+                if (
+                    debugRequest.content.command === 'dumpCell' &&
+                    debugRequest.content.arguments &&
+                    typeof debugRequest.content.arguments === 'object' &&
+                    typeof debugRequest.content.arguments['code'] === 'string'
+                ) {
+                    descriptionParts = [`${debugRequest.content.command}`];
+                    this.description = descriptionParts
+                        .concat([
+                            `, ${debugRequest.content.arguments.code
+                                .split('\r\n')
+                                .join('\\r\\n')
+                                .split('\n')
+                                .join('\\n')}`
+                        ])
+                        .join('');
+                    this.tooltip = debugRequest.content.arguments.code;
+                }
+                if (
+                    debugRequest.content.command === 'setBreakpoints' &&
+                    debugRequest.content.arguments &&
+                    typeof debugRequest.content.arguments === 'object' &&
+                    typeof debugRequest.content.arguments['source'] === 'object' &&
+                    typeof debugRequest.content.arguments['source']['path'] === 'string' &&
+                    Array.isArray(debugRequest.content.arguments['breakpoints'])
+                ) {
+                    descriptionParts = [
+                        `${debugRequest.content.command}, source: ${debugRequest.content.arguments.source.path}`
+                    ];
+                    const lines: string[] = [];
+                    debugRequest.content.arguments['breakpoints'].forEach((line) => {
+                        lines.push(line.line);
+                        descriptionParts.push(`\n,line: ${line.line}`);
+                    });
+                    this.description = descriptionParts.join('');
+                    this.tooltip = `${debugRequest.content.arguments.source.path}\nlines: ${lines.join(', ')}`;
                 }
             }
         } else if (data.direction === 'recv') {
@@ -135,6 +175,7 @@ class MessageTreeItem extends TreeItem {
                     .join('\\r\\n')
                     .split('\n')
                     .join('\\n')}`;
+                this.tooltip = stream.content.text;
             }
 
             const execReply = data.msg as KernelMessage.IExecuteReplyMsg;
@@ -149,17 +190,24 @@ class MessageTreeItem extends TreeItem {
 
             const debugReply = data.msg as KernelMessage.IDebugReplyMsg;
             if (
-                data.msg.header.msg_type === 'debug_request' &&
+                data.msg.header.msg_type === 'debug_reply' &&
                 data.msg.channel === 'control' &&
                 debugReply.content.command
             ) {
                 this.description = `${debugReply.content.command} (success: ${debugReply.content.success}, seq: ${debugReply.content.seq})`;
+                if (
+                    debugReply.content.command === 'dumpCell' &&
+                    debugReply.content.body &&
+                    typeof debugReply.content.body['sourcePath'] === 'string'
+                ) {
+                    this.description = `${debugReply.content.command}, ${debugReply.content.body['sourcePath']}`;
+                }
             }
 
             const debugEvent = data.msg as KernelMessage.IDebugEventMsg;
             if (
-                data.msg.header.msg_type === 'debug_request' &&
-                data.msg.channel === 'control' &&
+                data.msg.header.msg_type === 'debug_event' &&
+                data.msg.channel === 'iopub' &&
                 debugEvent.content.event
             ) {
                 this.description = `${debugEvent.content.event} (seq: ${debugEvent.content.seq})`;
@@ -168,6 +216,9 @@ class MessageTreeItem extends TreeItem {
             if (data.msg.header.msg_type === 'error' && data.msg.channel === 'iopub' && errorMsg.content.ename) {
                 this.description = errorMsg.content.ename;
             }
+        }
+        if (!this.tooltip) {
+            this.tooltip = (this.description || '').replace(/\\n/g, '\n');
         }
     }
 }
