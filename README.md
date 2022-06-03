@@ -45,7 +45,7 @@ executed as a group together. The `Jupyter > Notebook Run Groups > Group Count` 
 
 ### Contextual Help
 
-Contextual help is a window that provides help text returned by the kernel when changing cursor position in a notebook.
+Contextual help rovides help text returned by the kernel when changing cursor position in a notebook.
 <img src=https://raw.githubusercontent.com/microsoft/vscode-jupyter-powertoys/main/images/README/contextualHelp.gif?>
 
 The amount of help text can be controlled with the `jupyter.contextualHelp.detailLevel` setting.
