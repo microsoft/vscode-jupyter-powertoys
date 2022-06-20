@@ -394,29 +394,29 @@
                     "group": "inline"
                 },
                 {
+                    "command": "jupyter-kernelManager.kernelMessageCopy",
+                    "when": "config.jupyter.inspectKernelMessages.enabled && view == jupyterKernelsView && viewItem =~ /kernelMessage/ && viewItem =~ /canCopyToClipboard/",
+                    "group": "inline"
+                },
+                {
                     "command": "jupyter-kernelManager.inspectKernelMessages",
                     "when": "config.jupyter.inspectKernelMessages.enabled && view == jupyterKernelsView && viewItem =~ /activeKernelRoot/",
                     "group": "inline"
                 },
                 {
-                    "command": "jupyter-kernelManager.clearKernelMessages",
+                    "command": "jupyter-kernelManager.viewKernelMessagesAsList",
                     "when": "config.jupyter.inspectKernelMessages.enabled && view == jupyterKernelsView && viewItem =~ /kernelMessagesRoot/",
-                    "group": "inline"
+                    "group": "inline@1"
                 },
                 {
                     "command": "jupyter-kernelManager.viewKernelMessagesAsTree",
                     "when": "config.jupyter.inspectKernelMessages.enabled && view == jupyterKernelsView && viewItem =~ /kernelMessagesRoot/",
-                    "group": "inline"
+                    "group": "inline@2"
                 },
                 {
-                    "command": "jupyter-kernelManager.viewKernelMessagesAsList",
+                    "command": "jupyter-kernelManager.clearKernelMessages",
                     "when": "config.jupyter.inspectKernelMessages.enabled && view == jupyterKernelsView && viewItem =~ /kernelMessagesRoot/",
-                    "group": "inline"
-                },
-                {
-                    "command": "jupyter-kernelManager.kernelMessageCopy",
-                    "when": "config.jupyter.inspectKernelMessages.enabled && view == jupyterKernelsView && viewItem =~ /kernelMessage/ && viewItem =~ /canCopyToClipboard/",
-                    "group": "inline"
+                    "group": "inline@3"
                 }
             ]
         },
