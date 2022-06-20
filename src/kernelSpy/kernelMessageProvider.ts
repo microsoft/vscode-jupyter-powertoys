@@ -7,7 +7,7 @@ import {
     IActiveRemoteKernelTreeNode,
     ICustomNodeFromAnotherProvider
 } from '../kernelManager/types';
-import { commands, Disposable, EventEmitter, ThemeIcon, TreeItem, TreeItemCollapsibleState } from 'vscode';
+import { commands, Disposable, env, EventEmitter, ThemeIcon, TreeItem, TreeItemCollapsibleState } from 'vscode';
 import { IActiveKernelChildNodesProvider } from '../kernelManager/kernelChildNodeProvider';
 import { IExportedKernelService, IKernelConnectionInfo } from '../kernelManager/vscodeJupyter';
 import { IAnyMessageArgs, IKernelConnection } from '@jupyterlab/services/lib/kernel/kernel';
@@ -41,6 +41,7 @@ const requestIconsByMessageType = new Map<MessageType, string>([
     ['comm_info_request', 'info'],
     ['comm_close', 'close'],
     ['comm_open', 'folder-opened'],
+    ['comm_msg', 'gear'],
     ['shutdown_request', 'close']
 ]);
 const responseIconsByMessageType = new Map<MessageType, string>([
@@ -48,24 +49,37 @@ const responseIconsByMessageType = new Map<MessageType, string>([
     ['error', 'error'],
     ['comm_close', 'sign-out'],
     ['comm_open', 'sign-in'],
-    ['status', 'report'],
+    ['comm_msg', 'gear'],
+    ['status', 'pulse'],
     ['debug_event', 'debug'],
     ['debug_reply', 'debug'],
     ['display_data', 'output'],
-    ['stream', 'output']
+    ['stream', 'symbol-key']
 ]);
+function getTextForClipboard(value: unknown) {
+    if (typeof value === 'string') {
+        return value.trim();
+    } else if (typeof value === 'number') {
+        return value.toString();
+    } else if (typeof value === 'boolean') {
+        return value.toString();
+    }
+    return undefined;
+}
 class MessageTreeItem extends TreeItem {
     constructor(public readonly data: MessageNode) {
         super(data.label, TreeItemCollapsibleState.Collapsed);
         this.description = data.description;
+        this.contextValue = `kernelMessageItem:${data.__type}:${data.clipboardText ? 'canCopyToClipboard' : ''}`;
         if (data.__type === 'parentMessageNode' || data.direction === 'send') {
+            this.iconPath = new ThemeIcon('call-outgoing');
             if (data.__type !== 'parentMessageNode') {
                 const icon = requestIconsByMessageType.get(data.msg.header.msg_type) || 'indent';
                 this.iconPath = new ThemeIcon(icon);
             }
             const exec = data.msg as KernelMessage.IExecuteRequestMsg;
             if (data.msg.header.msg_type === 'execute_request' && data.msg.channel === 'shell' && exec.content.code) {
-                this.description = exec.content.code.split('\r\n').join('\\r\\n').split('\n').join('\\n');
+                this.description = getSingleLineValue(exec.content.code);
                 this.tooltip = exec.content.code;
             }
             const complete = data.msg as KernelMessage.IIsCompleteRequestMsg;
@@ -74,7 +88,7 @@ class MessageTreeItem extends TreeItem {
                 data.msg.channel === 'shell' &&
                 complete.content.code
             ) {
-                this.description = complete.content.code.split('\r\n').join('\\r\\n').split('\n').join('\\n');
+                this.description = getSingleLineValue(complete.content.code);
                 this.tooltip = complete.content.code;
             }
             const inspect = data.msg as KernelMessage.IInspectRequestMsg;
@@ -83,7 +97,7 @@ class MessageTreeItem extends TreeItem {
                 data.msg.channel === 'shell' &&
                 inspect.content.code
             ) {
-                this.description = inspect.content.code.split('\r\n').join('\\r\\n').split('\n').join('\\n');
+                this.description = getSingleLineValue(inspect.content.code);
                 this.tooltip = inspect.content.code;
             }
             const debugRequest = data.msg as KernelMessage.IDebugRequestMsg;
@@ -144,7 +158,7 @@ class MessageTreeItem extends TreeItem {
                 }
             }
         } else if (data.direction === 'recv') {
-            const icon = responseIconsByMessageType.get(data.msg.header.msg_type) || 'reply';
+            const icon = responseIconsByMessageType.get(data.msg.header.msg_type) || 'call-incoming';
             this.iconPath = new ThemeIcon(icon);
 
             const statusMsg = data.msg as KernelMessage.IStatusMsg;
@@ -227,6 +241,7 @@ class DataTreeItem extends TreeItem {
         super(data.label, data.hasChildren ? TreeItemCollapsibleState.Collapsed : TreeItemCollapsibleState.None);
         this.description = data.description;
         this.tooltip = data.tooltip;
+        this.contextValue = `kernelMessageItem:${data.__type}:${data.clipboardText ? 'canCopyToClipboard' : ''}`;
     }
 }
 
@@ -240,6 +255,8 @@ type MessageNode =
           parent?: MessageNode;
           msg: KernelMessage.IMessage;
           connection: Kernel.IKernelConnection;
+          isTopLevelMessage?: boolean;
+          clipboardText?: string;
       })
     | (ICustomNodeFromAnotherProvider & {
           __type: 'messageNode';
@@ -250,6 +267,8 @@ type MessageNode =
           parent?: MessageNode;
           msg: KernelMessage.IMessage;
           connection: Kernel.IKernelConnection;
+          isTopLevelMessage?: boolean;
+          clipboardText?: string;
       })
     | (ICustomNodeFromAnotherProvider & {
           __type: 'messageNode';
@@ -260,6 +279,8 @@ type MessageNode =
           parent?: MessageNode;
           msg: KernelMessage.IMessage;
           connection: Kernel.IKernelConnection;
+          isTopLevelMessage?: boolean;
+          clipboardText?: string;
       });
 type DataNode =
     | (ICustomNodeFromAnotherProvider & {
@@ -271,6 +292,7 @@ type DataNode =
           property: string;
           paths: (string | number)[];
           hasChildren: boolean;
+          clipboardText?: string;
       })
     | (ICustomNodeFromAnotherProvider & {
           __type: 'dataNode';
@@ -280,9 +302,22 @@ type DataNode =
           msg: KernelMessage.IMessage;
           index: number;
           paths: (string | number)[];
+          clipboardText?: string;
           hasChildren: boolean;
       });
 
+function getStringRepresentation(value: unknown) {
+    if (value === undefined) {
+        return 'undefined';
+    } else if (value === null) {
+        return 'null';
+    } else {
+        return (value as string).toString();
+    }
+}
+function getSingleLineValue(value: string) {
+    return value.split('\r\n').join('\\r\\n').split('\n').join('\\n');
+}
 export class ActiveKernelMessageProvider implements IActiveKernelChildNodesProvider {
     private activated?: boolean;
     private readonly _onDidChangeTreeData = new EventEmitter<
@@ -299,17 +334,31 @@ export class ActiveKernelMessageProvider implements IActiveKernelChildNodesProvi
     }
     constructor(private readonly kernelService: IExportedKernelService) {}
     public readonly id = 'kernelSpy';
+    private messageViewType: 'tree' | 'list' = 'tree';
     public activate() {
         if (this.activated) {
             return;
         }
         this.disposables.push(
-            commands.registerCommand('jupyter-kernelManager.clearKernelMessages', (data: RootNode) => {
-                const info = this.getConnectionInfo(data.connection);
-                info.requestsById.clear();
-                info.messages.splice(0, info.messages.length);
-                this._onDidChangeTreeData.fire(data);
-            })
+            ...[
+                commands.registerCommand('jupyter-kernelManager.clearKernelMessages', (data: RootNode) => {
+                    const info = this.getConnectionInfo(data.connection);
+                    info.requestsById.clear();
+                    info.messages.splice(0, info.messages.length);
+                    this._onDidChangeTreeData.fire(data);
+                }),
+                commands.registerCommand('jupyter-kernelManager.viewKernelMessagesAsTree', (data: RootNode) => {
+                    this.messageViewType = 'tree';
+                    this._onDidChangeTreeData.fire(data);
+                }),
+                commands.registerCommand('jupyter-kernelManager.viewKernelMessagesAsList', (data: RootNode) => {
+                    this.messageViewType = 'list';
+                    this._onDidChangeTreeData.fire(data);
+                }),
+                commands.registerCommand('jupyter-kernelManager.kernelMessageCopy', (data: DataNode | MessageNode) => {
+                    env.clipboard.writeText(data.clipboardText || '');
+                })
+            ]
         );
         this.activated = true;
         this.kernelService.onDidChangeKernels(
@@ -359,7 +408,11 @@ export class ActiveKernelMessageProvider implements IActiveKernelChildNodesProvi
         const ourNode = node as Node;
         if (ourNode.__type === 'rootNode') {
             const messages = this.getConnectionInfo(ourNode.connection).messages;
-            return messages;
+            if (this.messageViewType === 'tree') {
+                return messages.filter((msg) => msg.isTopLevelMessage);
+            } else {
+                return messages;
+            }
         } else if (ourNode.__type === 'parentMessageNode') {
             const info = this.getConnectionInfo(ourNode.connection);
             const children = info.requestsById.get(ourNode.msg_id);
@@ -369,6 +422,7 @@ export class ActiveKernelMessageProvider implements IActiveKernelChildNodesProvi
                 return [];
             }
         } else if (ourNode.__type === 'messageNode') {
+            const header = ourNode.msg.header as KernelMessage.IHeader<any>;
             return Object.keys(ourNode.msg).map((prop) => {
                 const value = (ourNode.msg as any)[prop];
                 const hasChildren =
@@ -378,11 +432,40 @@ export class ActiveKernelMessageProvider implements IActiveKernelChildNodesProvi
                 const isEmptyObject = hasChildren && !Array.isArray(value) && Object.keys(value).length === 0;
                 const isEmptyArray = hasChildren && Array.isArray(value) && value.length === 0;
                 const stringValue =
-                    typeof value === 'string'
-                        ? value.split('\r\n').join('\\r\\n').split('\n').join('\\n')
-                        : value.toString();
-                const description = isEmptyObject ? '{ }' : isEmptyArray ? '[ ]' : stringValue;
-                const tooltip = isEmptyObject ? '{ }' : isEmptyArray ? '[ ]' : value.toString();
+                    typeof value === 'string' ? getSingleLineValue(value) : getStringRepresentation(value);
+                let description = isEmptyObject ? '{ }' : isEmptyArray ? '[ ]' : stringValue;
+                let tooltip = isEmptyObject ? '{ }' : isEmptyArray ? '[ ]' : getStringRepresentation(value);
+                if (!value) {
+                } else if (prop === 'header') {
+                    description = `msg_id: ${header.msg_id}`;
+                } else if (prop === 'parent_header') {
+                    const parentHeader = ourNode.msg.parent_header as KernelMessage.IHeader<any>;
+                    if (parentHeader && 'msg_id' in parentHeader) {
+                        description = `msg_id: ${parentHeader.msg_id}`;
+                    }
+                } else if (prop === 'content' && header.msg_type === 'comm_open') {
+                    const commOpen = ourNode.msg as KernelMessage.ICommOpenMsg;
+                    description = `${commOpen.content.target_name}: ${commOpen.content.comm_id}`;
+                    tooltip = `target_name: ${commOpen.content.target_name}\ncomm_id: ${commOpen.content.comm_id}\target_module: ${commOpen.content.target_module}`;
+                } else if (prop === 'content' && header.msg_type === 'comm_msg') {
+                    const commMsg = ourNode.msg as KernelMessage.ICommMsgMsg;
+                    description = `comm_id: ${commMsg.content.comm_id}`;
+                } else if (prop === 'content' && header.msg_type === 'display_data') {
+                    const commMsg = ourNode.msg as KernelMessage.IDisplayDataMsg;
+                    const mimes = Object.keys(commMsg.content.data);
+                    tooltip = mimes.join(', ');
+                    description = mimes
+                        .map((mime) => {
+                            if (mime === 'application/vnd.jupyter.widget-view+json') {
+                                const mimeData = (commMsg.content.data[mime] as any) || { model_id: '' };
+                                return `${mime}:${mimeData['model_id']}`;
+                            } else {
+                                return mime;
+                            }
+                        })
+                        .join(', ');
+                }
+
                 return <DataNode>{
                     __type: 'dataNode',
                     description,
@@ -393,17 +476,20 @@ export class ActiveKernelMessageProvider implements IActiveKernelChildNodesProvi
                     providerId: ourNode.providerId,
                     type: 'customNodeFromAnotherProvider',
                     msg: ourNode.msg,
-                    hasChildren: hasChildren && !isEmptyObject && !isEmptyArray
+                    hasChildren: hasChildren && !isEmptyObject && !isEmptyArray,
+                    clipboardText: getTextForClipboard(value)
                 };
             });
         } else {
             let data = ourNode.msg;
+            const currentPath = ourNode.paths.join('.');
             ourNode.paths.forEach((path) => {
                 data = (data as any)[path];
             });
             if (typeof data === 'undefined' || data === null) {
                 return [];
             }
+            const header = ourNode.msg.header as KernelMessage.IHeader<any>;
             if (Array.isArray(data)) {
                 return data.map((value, index) => {
                     const hasChildren =
@@ -413,11 +499,9 @@ export class ActiveKernelMessageProvider implements IActiveKernelChildNodesProvi
                     const isEmptyObject = hasChildren && !Array.isArray(value) && Object.keys(value).length === 0;
                     const isEmptyArray = hasChildren && Array.isArray(value) && value.length === 0;
                     const stringValue =
-                        typeof value === 'string'
-                            ? value.split('\r\n').join('\\r\\n').split('\n').join('\\n')
-                            : value.toString();
+                        typeof value === 'string' ? getSingleLineValue(value) : getStringRepresentation(value);
                     const description = isEmptyObject ? '{ }' : isEmptyArray ? '[ ]' : stringValue;
-                    const tooltip = isEmptyObject ? '{ }' : isEmptyArray ? '[ ]' : value.toString();
+                    const tooltip = isEmptyObject ? '{ }' : isEmptyArray ? '[ ]' : getStringRepresentation(value);
                     return <DataNode>{
                         __type: 'dataNode',
                         description,
@@ -428,7 +512,8 @@ export class ActiveKernelMessageProvider implements IActiveKernelChildNodesProvi
                         providerId: ourNode.providerId,
                         type: 'customNodeFromAnotherProvider',
                         msg: ourNode.msg,
-                        hasChildren: hasChildren && !isEmptyObject && !isEmptyArray
+                        hasChildren: hasChildren && !isEmptyObject && !isEmptyArray,
+                        clipboardText: getTextForClipboard(value)
                     };
                 });
             } else if (typeof data === 'object') {
@@ -441,11 +526,24 @@ export class ActiveKernelMessageProvider implements IActiveKernelChildNodesProvi
                     const isEmptyObject = hasChildren && !Array.isArray(value) && Object.keys(value).length === 0;
                     const isEmptyArray = hasChildren && Array.isArray(value) && value.length === 0;
                     const stringValue =
-                        typeof value === 'string'
-                            ? value.split('\r\n').join('\\r\\n').split('\n').join('\\n')
-                            : value.toString();
-                    const description = isEmptyObject ? '{ }' : isEmptyArray ? '[ ]' : stringValue;
-                    const tooltip = isEmptyObject ? '{ }' : isEmptyArray ? '[ ]' : value.toString();
+                        typeof value === 'string' ? getSingleLineValue(value) : getStringRepresentation(value);
+                    let description = isEmptyObject ? '{ }' : isEmptyArray ? '[ ]' : stringValue;
+                    let tooltip = isEmptyObject ? '{ }' : isEmptyArray ? '[ ]' : getStringRepresentation(value);
+                    if (header.msg_type === 'comm_msg' && value && typeof value === 'object') {
+                        if (
+                            (currentPath === 'content' && prop === 'data') ||
+                            (currentPath === 'content.data' && prop === 'state')
+                        ) {
+                            try {
+                                // Don't attempt to serialize buffer_paths (could contain a lot of info).
+                                description = JSON.stringify({ ...value, buffer_paths: [] });
+                                tooltip = JSON.stringify({ ...value, buffer_paths: [] }, undefined, 4);
+                            } catch {
+                                //
+                            }
+                        }
+                    }
+
                     return <DataNode>{
                         __type: 'dataNode',
                         description,
@@ -456,7 +554,8 @@ export class ActiveKernelMessageProvider implements IActiveKernelChildNodesProvi
                         providerId: ourNode.providerId,
                         type: 'customNodeFromAnotherProvider',
                         msg: ourNode.msg,
-                        hasChildren: hasChildren && !isEmptyObject && !isEmptyArray
+                        hasChildren: hasChildren && !isEmptyObject && !isEmptyArray,
+                        clipboardText: getTextForClipboard(value)
                     };
                 });
             } else {
@@ -535,16 +634,17 @@ export class ActiveKernelMessageProvider implements IActiveKernelChildNodesProvi
             type: 'customNodeFromAnotherProvider'
         };
         const info = requestsById.get(args.msg.header.msg_id) || requestsById.get(parentId);
+        messages.push(message);
         if (info) {
             message.parent = info.parent;
             info.children.push(message);
             this._onDidChangeTreeData.fire(info.parent);
         } else {
+            message.isTopLevelMessage = true;
             if (args.direction === 'send' && !requestsById.has(args.msg.header.msg_id)) {
                 requestsById.set(args.msg.header.msg_id, { parent: message, children: [{ ...message }] });
                 message.__type = 'parentMessageNode';
             }
-            messages.push(message);
             if (root) {
                 this._onDidChangeTreeData.fire(root);
             }
@@ -573,12 +673,13 @@ export class ActiveKernelMessageProvider implements IActiveKernelChildNodesProvi
             type: 'customNodeFromAnotherProvider'
         };
         const info = requestsById.get(args.header.msg_id) || requestsById.get(parentId);
+        messages.push(message);
         if (info) {
             message.parent = info.parent;
             info.children.push(message);
             this._onDidChangeTreeData.fire(info.parent);
         } else {
-            messages.push(message);
+            message.isTopLevelMessage = true;
             if (root) {
                 this._onDidChangeTreeData.fire(root);
             }
@@ -607,12 +708,13 @@ export class ActiveKernelMessageProvider implements IActiveKernelChildNodesProvi
             type: 'customNodeFromAnotherProvider'
         };
         const info = requestsById.get(args.header.msg_id) || requestsById.get(parentId);
+        messages.push(message);
         if (info) {
             message.parent = info.parent;
             info.children.push(message);
             this._onDidChangeTreeData.fire(info.parent);
         } else {
-            messages.push(message);
+            message.isTopLevelMessage = true;
             if (root) {
                 this._onDidChangeTreeData.fire(root);
             }
