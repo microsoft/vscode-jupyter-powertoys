@@ -9,37 +9,55 @@ import { log } from './util/logging';
 // Register our commands for run groups
 export function registerCommands(context: vscode.ExtensionContext) {
     // Register add commands
-    context.subscriptions.push(vscode.commands.registerCommand('vscode-notebook-groups.addGroup1', (args) => {
-        addToGroup(RunGroup.one, argNotebookCell(args));
-    }));
-    context.subscriptions.push(vscode.commands.registerCommand('vscode-notebook-groups.addGroup2', (args) => {
-        addToGroup(RunGroup.two, argNotebookCell(args));
-    }));
-    context.subscriptions.push(vscode.commands.registerCommand('vscode-notebook-groups.addGroup3', (args) => {
-        addToGroup(RunGroup.three, argNotebookCell(args));
-    }));
+    context.subscriptions.push(
+        vscode.commands.registerCommand('vscode-notebook-groups.addGroup1', (args) => {
+            addToGroup(RunGroup.one, argNotebookCell(args));
+        })
+    );
+    context.subscriptions.push(
+        vscode.commands.registerCommand('vscode-notebook-groups.addGroup2', (args) => {
+            addToGroup(RunGroup.two, argNotebookCell(args));
+        })
+    );
+    context.subscriptions.push(
+        vscode.commands.registerCommand('vscode-notebook-groups.addGroup3', (args) => {
+            addToGroup(RunGroup.three, argNotebookCell(args));
+        })
+    );
 
     // Register remove commands
-    context.subscriptions.push(vscode.commands.registerCommand('vscode-notebook-groups.removeGroup1', (args) => {
-        removeFromGroup(RunGroup.one, argNotebookCell(args));
-    }));
-    context.subscriptions.push(vscode.commands.registerCommand('vscode-notebook-groups.removeGroup2', (args) => {
-        removeFromGroup(RunGroup.two, argNotebookCell(args));
-    }));
-    context.subscriptions.push(vscode.commands.registerCommand('vscode-notebook-groups.removeGroup3', (args) => {
-        removeFromGroup(RunGroup.three, argNotebookCell(args));
-    }));
+    context.subscriptions.push(
+        vscode.commands.registerCommand('vscode-notebook-groups.removeGroup1', (args) => {
+            removeFromGroup(RunGroup.one, argNotebookCell(args));
+        })
+    );
+    context.subscriptions.push(
+        vscode.commands.registerCommand('vscode-notebook-groups.removeGroup2', (args) => {
+            removeFromGroup(RunGroup.two, argNotebookCell(args));
+        })
+    );
+    context.subscriptions.push(
+        vscode.commands.registerCommand('vscode-notebook-groups.removeGroup3', (args) => {
+            removeFromGroup(RunGroup.three, argNotebookCell(args));
+        })
+    );
 
     // Register execute commands
-    context.subscriptions.push(vscode.commands.registerCommand('vscode-notebook-groups.executeGroup1', (args) => {
-        executeGroup(RunGroup.one, argNotebookCell(args));
-    }));
-    context.subscriptions.push(vscode.commands.registerCommand('vscode-notebook-groups.executeGroup2', (args) => {
-        executeGroup(RunGroup.two, argNotebookCell(args));
-    }));
-    context.subscriptions.push(vscode.commands.registerCommand('vscode-notebook-groups.executeGroup3', (args) => {
-        executeGroup(RunGroup.three, argNotebookCell(args));
-    }));
+    context.subscriptions.push(
+        vscode.commands.registerCommand('vscode-notebook-groups.executeGroup1', (args) => {
+            executeGroup(RunGroup.one, argNotebookCell(args));
+        })
+    );
+    context.subscriptions.push(
+        vscode.commands.registerCommand('vscode-notebook-groups.executeGroup2', (args) => {
+            executeGroup(RunGroup.two, argNotebookCell(args));
+        })
+    );
+    context.subscriptions.push(
+        vscode.commands.registerCommand('vscode-notebook-groups.executeGroup3', (args) => {
+            executeGroup(RunGroup.three, argNotebookCell(args));
+        })
+    );
 }
 
 // Is the given argument a vscode NotebookCell?
@@ -59,17 +77,20 @@ function executeGroup(targetRunGroup: RunGroup, notebookCell?: vscode.NotebookCe
 
     // If we didn't get a cell passed in, just take the active documents
     if (!doc) {
-        doc = vscode.window.activeNotebookEditor?.document;
+        doc = vscode.window.activeNotebookEditor?.notebook;
         doc || log('Execute group called without a valid document to execute');
     }
 
     // Collect our cell indexes
-    const targetCells = doc?.getCells().filter(notebookCell => cellInGroup(notebookCell, targetRunGroup)).map(cell => {
-        return { start: cell.index, end: cell.index + 1 };
-    });
+    const targetCells = doc
+        ?.getCells()
+        .filter((notebookCell) => cellInGroup(notebookCell, targetRunGroup))
+        .map((cell) => {
+            return { start: cell.index, end: cell.index + 1 };
+        });
 
     // Execute the cells
-    vscode.commands.executeCommand('notebook.cell.execute', { ranges: targetCells } );
+    vscode.commands.executeCommand('notebook.cell.execute', { ranges: targetCells });
 }
 
 // Determine if a cell is in a given run group
@@ -123,7 +144,7 @@ function getCurrentActiveCell(): vscode.NotebookCell | undefined {
         // || is ok here as 0 index is the same as the default value
         const selectedCellIndex = activeNotebook?.selections[0]?.start || 0;
 
-        return activeNotebook.document.cellCount >= 1 ? activeNotebook.document.cellAt(selectedCellIndex) : undefined;
+        return activeNotebook.notebook.cellCount >= 1 ? activeNotebook.notebook.cellAt(selectedCellIndex) : undefined;
     }
 }
 
