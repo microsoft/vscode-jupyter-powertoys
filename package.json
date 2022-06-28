@@ -44,7 +44,6 @@
         "Visualization"
     ],
     "enabledApiProposals": [
-        "notebookEditor",
         "notebookEditorEdit"
     ],
     "main": "./out/main.js",
@@ -496,7 +495,7 @@
         "kill-compiled": "deemon --kill npm run watch"
     },
     "devDependencies": {
-        "@nteract/transforms": "^5.0.4-alpha.0",
+        "@nteract/transforms": "^3.2.0",
         "@types/fs-extra": "^9.0.13",
         "@types/glob": "^7.1.4",
         "@types/loadable__component": "^5.13.4",

@@ -28,8 +28,8 @@ export class ContextualHelp extends WebviewViewHost<MessageMapping> implements v
     private kernelService: IExportedKernelService | undefined;
 
     protected get owningResource(): Resource {
-        if (vscode.window.activeNotebookEditor?.document) {
-            return vscode.window.activeNotebookEditor.document.uri;
+        if (vscode.window.activeNotebookEditor?.notebook) {
+            return vscode.window.activeNotebookEditor.notebook.uri;
         }
         return undefined;
     }
@@ -265,7 +265,7 @@ export class ContextualHelp extends WebviewViewHost<MessageMapping> implements v
 
     private async activeNotebookSelectionChanged(e: vscode.NotebookEditorSelectionChangeEvent) {
         // Find the matching text editor for the cell we just switched to
-        const cell = e.notebookEditor.document.cellAt(e.selections[0].start);
+        const cell = e.notebookEditor.notebook.cellAt(e.selections[0].start);
         if (cell) {
             const editor = vscode.window.visibleTextEditors.find((e) => e.document === cell.document);
             if (editor) {

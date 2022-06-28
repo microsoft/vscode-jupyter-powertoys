@@ -11,7 +11,7 @@ export function updateContextKeys() {
 
     if (activeSelections?.length) {
         const activeSelection = activeSelections[0];
-        const activeCell = vscode.window.activeNotebookEditor?.document.cellAt(activeSelection.start);
+        const activeCell = vscode.window.activeNotebookEditor?.notebook.cellAt(activeSelection.start);
         activeCell && setCellContextKeys(activeCell);
     }
 }

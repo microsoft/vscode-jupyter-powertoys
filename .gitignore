@@ -3,3 +3,4 @@ node_modules
 vscode.d.ts
 vscode.*.d.ts
 .vscode-test
+*.vsix
