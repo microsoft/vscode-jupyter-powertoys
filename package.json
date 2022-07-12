@@ -44,7 +44,7 @@
         "Visualization"
     ],
     "enabledApiProposals": [
-        "notebookEditorEdit"
+        "notebookWorkspaceEdit"
     ],
     "main": "./out/main.js",
     "browser": "./out/web.main.js",
