@@ -11,7 +11,8 @@ on:
     workflow_dispatch:
 
 env:
-    NODE_VERSION: 16.13.0
+    NODE_VERSION: 16.14.2
+    NPM_VERSION: 8.15.1
     IS_CI: 1
 
 jobs:
@@ -26,6 +27,9 @@ jobs:
               uses: actions/setup-node@v2.1.5
               with:
                   node-version: ${{env.NODE_VERSION}}
+
+            - run: npm i -g npm@${{env.NPM_VERSION}}
+              name: npm install npm@8.15.1
 
             - run: npm install
               name: npm install
@@ -55,6 +59,9 @@ jobs:
               uses: actions/setup-node@v2.1.5
               with:
                   node-version: ${{env.NODE_VERSION}}
+
+            - run: npm i -g npm@${{env.NPM_VERSION}}
+              name: npm install npm@8.15.1
 
             - run: npm install
               name: npm install
