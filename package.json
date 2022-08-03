@@ -558,5 +558,8 @@
         "rxjs": "^6.5.4",
         "style-loader": "^3.3.1",
         "untildify": "^4.0.0"
+    },
+    "overrides": {
+        "terser@<5.14.2": "5.14.2"
     }
 }

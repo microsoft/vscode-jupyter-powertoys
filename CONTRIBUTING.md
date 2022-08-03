@@ -20,8 +20,9 @@ Before starting on a PR an [issue](https://github.com/microsoft/vscode-jupyter-p
 Submissions that do not have an associated issue are unlikely to be approved.
 
 ### Prerequisites
-1. [Node.js](https://nodejs.org/)
-2. [Visual Studio Code](https://code.visualstudio.com/)
+1. [Node.js](https://nodejs.org/) 16.14.2
+2. [npm](https://www.npmjs.com/) 8.15.1
+3. [Visual Studio Code](https://code.visualstudio.com/)
 
 ### Setup
 ```shell

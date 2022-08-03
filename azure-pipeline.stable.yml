@@ -19,6 +19,9 @@ extends:
   parameters:
     publishExtension: true
     buildSteps:
+      - script: npm i -g npm@8.15.1
+        displayName: npm install npm@8.15.1
+
       - script: npm ci
         displayName: Install dependencies
 
