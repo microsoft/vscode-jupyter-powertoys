@@ -14,6 +14,8 @@ export function registerDocuments(context: vscode.ExtensionContext) {
     updateContextKeys();
 }
 
+// IANHU: Not needed anymore?
+// IANHU: Perhaps replace with active document changed so we update the bigger UI items
 function selectionChanged(value: any) {
     updateContextKeys();
 }

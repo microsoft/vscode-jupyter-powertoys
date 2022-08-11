@@ -62,7 +62,8 @@
                 "icon": {
                     "light": "images/notebookRunGroups/icons/RunGroupOne/RunGroupOneRun-light.svg",
                     "dark": "images/notebookRunGroups/icons/RunGroupOne/RunGroupOneRun-dark.svg"
-                }
+                },
+                "enablement": "notebookRunGroups.groupOneActive"
             },
             {
                 "command": "vscode-notebook-groups.addGroup1",
@@ -89,7 +90,8 @@
                 "icon": {
                     "light": "images/notebookRunGroups/icons/RunGroupTwo/RunGroupTwoRun-light.svg",
                     "dark": "images/notebookRunGroups/icons/RunGroupTwo/RunGroupTwoRun-dark.svg"
-                }
+                },
+                "enablement": "notebookRunGroups.groupTwoActive"
             },
             {
                 "command": "vscode-notebook-groups.addGroup2",
@@ -116,7 +118,8 @@
                 "icon": {
                     "light": "images/notebookRunGroups/icons/RunGroupThree/RunGroupThreeRun-light.svg",
                     "dark": "images/notebookRunGroups/icons/RunGroupThree/RunGroupThreeRun-dark.svg"
-                }
+                },
+                "enablement": "notebookRunGroups.groupThreeActive"
             },
             {
                 "command": "vscode-notebook-groups.addGroup3",
@@ -299,7 +302,8 @@
                 {
                     "command": "vscode-notebook-groups.executeGroup1",
                     "group": "inline/cell@12",
-                    "when": "config.jupyter.notebookRunGroups.groupCount > 0 && notebookRunGroups.inGroupOne && config.jupyter.notebookRunGroups.runIconsOnCell && config.jupyter.notebookRunGroups.enabled"
+                    "when": "config.jupyter.notebookRunGroups.groupCount > 0 && notebookRunGroups.inGroupOne && config.jupyter.notebookRunGroups.runIconsOnCell && config.jupyter.notebookRunGroups.enabled",
+                    "enablement": "notebookRunGroups.groupOneActive"
                 },
                 {
                     "command": "vscode-notebook-groups.addGroup2",
@@ -333,20 +337,6 @@
                 }
             ],
             "notebook/cell/execute": [
-                {
-                    "command": "vscode-notebook-groups.executeGroup1",
-                    "when": "config.jupyter.notebookRunGroups.groupCount > 0 && notebookRunGroups.inGroupOne && config.jupyter.notebookRunGroups.runIconsInExecute && config.jupyter.notebookRunGroups.enabled"
-                },
-                {
-                    "command": "vscode-notebook-groups.executeGroup2",
-                    "when": "config.jupyter.notebookRunGroups.groupCount > 1 && notebookRunGroups.inGroupTwo && config.jupyter.notebookRunGroups.runIconsInExecute && config.jupyter.notebookRunGroups.enabled"
-                },
-                {
-                    "command": "vscode-notebook-groups.executeGroup3",
-                    "when": "config.jupyter.notebookRunGroups.groupCount > 2 && notebookRunGroups.inGroupThree && config.jupyter.notebookRunGroups.runIconsInExecute && config.jupyter.notebookRunGroups.enabled"
-                }
-            ],
-            "notebook/cell/executePrimary": [
                 {
                     "command": "vscode-notebook-groups.executeGroup1",
                     "when": "config.jupyter.notebookRunGroups.groupCount > 0 && notebookRunGroups.inGroupOne && config.jupyter.notebookRunGroups.runIconsInExecute && config.jupyter.notebookRunGroups.enabled"

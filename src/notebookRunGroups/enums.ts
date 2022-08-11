@@ -2,6 +2,6 @@
 // Licensed under the MIT License.
 export enum RunGroup {
     one = 1,
-    two,
-    three
+    two = 2,
+    three = 3
 }
