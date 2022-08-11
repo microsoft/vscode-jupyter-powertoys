@@ -9,7 +9,8 @@
 - [ ] Clean up TODOs
 - [x] Consolidated run button
 - [x] Use cell status to show group membership
-- [ ] Restrict when command palette commands show up
+- [x] Restrict when command palette commands show up
+- [x] Adopt new context key support for cell resources
 - [ ] Basic VS Code tests
 - [ ] Cleanup README and skeleton code
 - [ ] Release on marketplace
