@@ -19,13 +19,17 @@ export function updateContextKeys() {
     let activeGroup2 = false;
     let activeGroup3 = false;
 
+    // Scan visible notebooks
     vscode.window.visibleNotebookEditors.forEach((notebookEditor) => {
         notebookEditor.notebook.getCells().forEach((cell) => {
+            // Check each cell for group membership and assign it to any group buckets
             const cellGroups = getCellRunGroupMetadata(cell);
 
             if (cellGroups.includes(RunGroup.one.toString())) {
                 group1Cells.push(cell.document.uri);
                 if (notebookEditor === vscode.window.activeNotebookEditor) {
+                    // We want to know if any cells in the active editor are in groups to
+                    // enable non-cell specific UI
                     activeGroup1 = true;
                 }
             }
@@ -51,27 +55,4 @@ export function updateContextKeys() {
     vscode.commands.executeCommand('setContext', 'notebookRunGroups.groupTwoActive', activeGroup2);
     vscode.commands.executeCommand('setContext', 'notebookRunGroups.groupThreeCells', group3Cells);
     vscode.commands.executeCommand('setContext', 'notebookRunGroups.groupThreeActive', activeGroup3);
-}
-
-// Add the specified cell to and out of any group context keys
-function setCellContextKeys(cell: vscode.NotebookCell) {
-    const currentValue = getCellRunGroupMetadata(cell);
-
-    if (currentValue.includes('1')) {
-        vscode.commands.executeCommand('setContext', 'notebookRunGroups.inGroupOne', true);
-    } else {
-        vscode.commands.executeCommand('setContext', 'notebookRunGroups.inGroupOne', false);
-    }
-
-    if (currentValue.includes('2')) {
-        vscode.commands.executeCommand('setContext', 'notebookRunGroups.inGroupTwo', true);
-    } else {
-        vscode.commands.executeCommand('setContext', 'notebookRunGroups.inGroupTwo', false);
-    }
-
-    if (currentValue.includes('3')) {
-        vscode.commands.executeCommand('setContext', 'notebookRunGroups.inGroupThree', true);
-    } else {
-        vscode.commands.executeCommand('setContext', 'notebookRunGroups.inGroupThree', false);
-    }
 }
