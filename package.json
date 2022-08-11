@@ -63,7 +63,7 @@
                     "light": "images/notebookRunGroups/icons/RunGroupOne/RunGroupOneRun-light.svg",
                     "dark": "images/notebookRunGroups/icons/RunGroupOne/RunGroupOneRun-dark.svg"
                 },
-                "enablement": "notebookRunGroups.groupOneActive"
+                "enablement": "resource in notebookRunGroups.groupOneDocuments"
             },
             {
                 "command": "vscode-notebook-groups.addGroup1",
@@ -91,7 +91,7 @@
                     "light": "images/notebookRunGroups/icons/RunGroupTwo/RunGroupTwoRun-light.svg",
                     "dark": "images/notebookRunGroups/icons/RunGroupTwo/RunGroupTwoRun-dark.svg"
                 },
-                "enablement": "notebookRunGroups.groupTwoActive"
+                "enablement": "resource in notebookRunGroups.groupTwoDocuments"
             },
             {
                 "command": "vscode-notebook-groups.addGroup2",
@@ -119,7 +119,7 @@
                     "light": "images/notebookRunGroups/icons/RunGroupThree/RunGroupThreeRun-light.svg",
                     "dark": "images/notebookRunGroups/icons/RunGroupThree/RunGroupThreeRun-dark.svg"
                 },
-                "enablement": "notebookRunGroups.groupThreeActive"
+                "enablement": "resource in notebookRunGroups.groupThreeDocuments"
             },
             {
                 "command": "vscode-notebook-groups.addGroup3",
@@ -302,8 +302,7 @@
                 {
                     "command": "vscode-notebook-groups.executeGroup1",
                     "group": "inline/cell@12",
-                    "when": "config.jupyter.notebookRunGroups.groupCount > 0 && notebookCellResource in notebookRunGroups.groupOneCells && config.jupyter.notebookRunGroups.runIconsOnCell && config.jupyter.notebookRunGroups.enabled",
-                    "enablement": "notebookRunGroups.groupOneActive"
+                    "when": "config.jupyter.notebookRunGroups.groupCount > 0 && notebookCellResource in notebookRunGroups.groupOneCells && config.jupyter.notebookRunGroups.runIconsOnCell && config.jupyter.notebookRunGroups.enabled"
                 },
                 {
                     "command": "vscode-notebook-groups.addGroup2",
