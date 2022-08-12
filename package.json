@@ -62,7 +62,8 @@
                 "icon": {
                     "light": "images/notebookRunGroups/icons/RunGroupOne/RunGroupOneRun-light.svg",
                     "dark": "images/notebookRunGroups/icons/RunGroupOne/RunGroupOneRun-dark.svg"
-                }
+                },
+                "enablement": "resource in notebookRunGroups.groupOneDocuments"
             },
             {
                 "command": "vscode-notebook-groups.addGroup1",
@@ -89,7 +90,8 @@
                 "icon": {
                     "light": "images/notebookRunGroups/icons/RunGroupTwo/RunGroupTwoRun-light.svg",
                     "dark": "images/notebookRunGroups/icons/RunGroupTwo/RunGroupTwoRun-dark.svg"
-                }
+                },
+                "enablement": "resource in notebookRunGroups.groupTwoDocuments"
             },
             {
                 "command": "vscode-notebook-groups.addGroup2",
@@ -116,7 +118,8 @@
                 "icon": {
                     "light": "images/notebookRunGroups/icons/RunGroupThree/RunGroupThreeRun-light.svg",
                     "dark": "images/notebookRunGroups/icons/RunGroupThree/RunGroupThreeRun-dark.svg"
-                }
+                },
+                "enablement": "resource in notebookRunGroups.groupThreeDocuments"
             },
             {
                 "command": "vscode-notebook-groups.addGroup3",
@@ -289,75 +292,61 @@
                 {
                     "command": "vscode-notebook-groups.addGroup1",
                     "group": "inline/cell@10",
-                    "when": "config.jupyter.notebookRunGroups.groupCount > 0 && !notebookRunGroups.inGroupOne && config.jupyter.notebookRunGroups.enabled"
+                    "when": "config.jupyter.notebookRunGroups.groupCount > 0 && notebookCellResource not in notebookRunGroups.groupOneCells && config.jupyter.notebookRunGroups.enabled"
                 },
                 {
                     "command": "vscode-notebook-groups.removeGroup1",
                     "group": "inline/cell@11",
-                    "when": "config.jupyter.notebookRunGroups.groupCount > 0 && notebookRunGroups.inGroupOne && config.jupyter.notebookRunGroups.enabled"
+                    "when": "config.jupyter.notebookRunGroups.groupCount > 0 && notebookCellResource in notebookRunGroups.groupOneCells && config.jupyter.notebookRunGroups.enabled"
                 },
                 {
                     "command": "vscode-notebook-groups.executeGroup1",
                     "group": "inline/cell@12",
-                    "when": "config.jupyter.notebookRunGroups.groupCount > 0 && notebookRunGroups.inGroupOne && config.jupyter.notebookRunGroups.runIconsOnCell && config.jupyter.notebookRunGroups.enabled"
+                    "when": "config.jupyter.notebookRunGroups.groupCount > 0 && notebookCellResource in notebookRunGroups.groupOneCells && config.jupyter.notebookRunGroups.runIconsOnCell && config.jupyter.notebookRunGroups.enabled"
                 },
                 {
                     "command": "vscode-notebook-groups.addGroup2",
                     "group": "inline/cell@13",
-                    "when": "config.jupyter.notebookRunGroups.groupCount > 1 && !notebookRunGroups.inGroupTwo && config.jupyter.notebookRunGroups.enabled"
+                    "when": "config.jupyter.notebookRunGroups.groupCount > 1 && notebookCellResource not in notebookRunGroups.groupTwoCells && config.jupyter.notebookRunGroups.enabled"
                 },
                 {
                     "command": "vscode-notebook-groups.removeGroup2",
                     "group": "inline/cell@14",
-                    "when": "config.jupyter.notebookRunGroups.groupCount > 1 && notebookRunGroups.inGroupTwo && config.jupyter.notebookRunGroups.enabled"
+                    "when": "config.jupyter.notebookRunGroups.groupCount > 1 && notebookCellResource in notebookRunGroups.groupTwoCells && config.jupyter.notebookRunGroups.enabled"
                 },
                 {
                     "command": "vscode-notebook-groups.executeGroup2",
                     "group": "inline/cell@15",
-                    "when": "config.jupyter.notebookRunGroups.groupCount > 1 && notebookRunGroups.inGroupTwo && config.jupyter.notebookRunGroups.runIconsOnCell && config.jupyter.notebookRunGroups.enabled"
+                    "when": "config.jupyter.notebookRunGroups.groupCount > 1 && notebookCellResource in notebookRunGroups.groupTwoCells && config.jupyter.notebookRunGroups.runIconsOnCell && config.jupyter.notebookRunGroups.enabled"
                 },
                 {
                     "command": "vscode-notebook-groups.addGroup3",
                     "group": "inline/cell@16",
-                    "when": "config.jupyter.notebookRunGroups.groupCount > 2 && !notebookRunGroups.inGroupThree && config.jupyter.notebookRunGroups.enabled"
+                    "when": "config.jupyter.notebookRunGroups.groupCount > 2 && notebookCellResource not in notebookRunGroups.groupThreeCells && config.jupyter.notebookRunGroups.enabled"
                 },
                 {
                     "command": "vscode-notebook-groups.removeGroup3",
                     "group": "inline/cell@17",
-                    "when": "config.jupyter.notebookRunGroups.groupCount > 2 && notebookRunGroups.inGroupThree && config.jupyter.notebookRunGroups.enabled"
+                    "when": "config.jupyter.notebookRunGroups.groupCount > 2 && notebookCellResource in notebookRunGroups.groupThreeCells && config.jupyter.notebookRunGroups.enabled"
                 },
                 {
                     "command": "vscode-notebook-groups.executeGroup3",
                     "group": "inline/cell@18",
-                    "when": "config.jupyter.notebookRunGroups.groupCount > 2 && notebookRunGroups.inGroupThree && config.jupyter.notebookRunGroups.runIconsOnCell && config.jupyter.notebookRunGroups.enabled"
+                    "when": "config.jupyter.notebookRunGroups.groupCount > 2 && notebookCellResource in notebookRunGroups.groupThreeCells && config.jupyter.notebookRunGroups.runIconsOnCell && config.jupyter.notebookRunGroups.enabled"
                 }
             ],
             "notebook/cell/execute": [
                 {
                     "command": "vscode-notebook-groups.executeGroup1",
-                    "when": "config.jupyter.notebookRunGroups.groupCount > 0 && notebookRunGroups.inGroupOne && config.jupyter.notebookRunGroups.runIconsInExecute && config.jupyter.notebookRunGroups.enabled"
+                    "when": "config.jupyter.notebookRunGroups.groupCount > 0 && notebookCellResource in notebookRunGroups.groupOneCells && config.jupyter.notebookRunGroups.runIconsInExecute && config.jupyter.notebookRunGroups.enabled"
                 },
                 {
                     "command": "vscode-notebook-groups.executeGroup2",
-                    "when": "config.jupyter.notebookRunGroups.groupCount > 1 && notebookRunGroups.inGroupTwo && config.jupyter.notebookRunGroups.runIconsInExecute && config.jupyter.notebookRunGroups.enabled"
+                    "when": "config.jupyter.notebookRunGroups.groupCount > 1 && notebookCellResource in notebookRunGroups.groupTwoCells && config.jupyter.notebookRunGroups.runIconsInExecute && config.jupyter.notebookRunGroups.enabled"
                 },
                 {
                     "command": "vscode-notebook-groups.executeGroup3",
-                    "when": "config.jupyter.notebookRunGroups.groupCount > 2 && notebookRunGroups.inGroupThree && config.jupyter.notebookRunGroups.runIconsInExecute && config.jupyter.notebookRunGroups.enabled"
-                }
-            ],
-            "notebook/cell/executePrimary": [
-                {
-                    "command": "vscode-notebook-groups.executeGroup1",
-                    "when": "config.jupyter.notebookRunGroups.groupCount > 0 && notebookRunGroups.inGroupOne && config.jupyter.notebookRunGroups.runIconsInExecute && config.jupyter.notebookRunGroups.enabled"
-                },
-                {
-                    "command": "vscode-notebook-groups.executeGroup2",
-                    "when": "config.jupyter.notebookRunGroups.groupCount > 1 && notebookRunGroups.inGroupTwo && config.jupyter.notebookRunGroups.runIconsInExecute && config.jupyter.notebookRunGroups.enabled"
-                },
-                {
-                    "command": "vscode-notebook-groups.executeGroup3",
-                    "when": "config.jupyter.notebookRunGroups.groupCount > 2 && notebookRunGroups.inGroupThree && config.jupyter.notebookRunGroups.runIconsInExecute && config.jupyter.notebookRunGroups.enabled"
+                    "when": "config.jupyter.notebookRunGroups.groupCount > 2 && notebookCellResource in notebookRunGroups.groupThreeCells && config.jupyter.notebookRunGroups.runIconsInExecute && config.jupyter.notebookRunGroups.enabled"
                 }
             ],
             "view/title": [

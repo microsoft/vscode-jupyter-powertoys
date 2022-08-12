@@ -1,40 +1,49 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 import * as vscode from 'vscode';
+import { RunGroup } from './enums';
 import { getCellRunGroupMetadata } from './util/cellMetadataHelpers';
 
-// To work around some issues with context keys I'm only considering the currently selected cell for
-// determining if I should show the remove or add buttons for each group. Long term I don't like this
-// solution though, so looking for a way around it
+// Note, this scans all open notebook editors when run, the operation should be very quick so this feels clean
+// and it's only triggered on more explicit user actions (doc open, metadata update) but can always
+// revisit for perf inefficency
 export function updateContextKeys() {
-    const activeSelections = vscode.window.activeNotebookEditor?.selections;
+    // Create our groups for what cells are in each run group
+    const group1Cells: Set<vscode.Uri> = new Set<vscode.Uri>();
+    const group2Cells: Set<vscode.Uri> = new Set<vscode.Uri>();
+    const group3Cells: Set<vscode.Uri> = new Set<vscode.Uri>();
 
-    if (activeSelections?.length) {
-        const activeSelection = activeSelections[0];
-        const activeCell = vscode.window.activeNotebookEditor?.notebook.cellAt(activeSelection.start);
-        activeCell && setCellContextKeys(activeCell);
-    }
-}
+    // Groups for what documents have any cells in a group active
+    const group1Documents: Set<vscode.Uri> = new Set<vscode.Uri>();
+    const group2Documents: Set<vscode.Uri> = new Set<vscode.Uri>();
+    const group3Documents: Set<vscode.Uri> = new Set<vscode.Uri>();
+    
+    // Scan visible notebooks
+    vscode.workspace.notebookDocuments.forEach((notebookDocument) => {
+        notebookDocument.getCells().forEach((cell) => {
+            // Check each cell for group membership and assign it to any group buckets
+            const cellGroups = getCellRunGroupMetadata(cell);
 
-// Add the specified cell to and out of any group context keys
-function setCellContextKeys(cell: vscode.NotebookCell) {
-    const currentValue = getCellRunGroupMetadata(cell);
+            if (cellGroups.includes(RunGroup.one.toString())) {
+                group1Cells.add(cell.document.uri);
+                group1Documents.add(cell.notebook.uri);
+            }
+            if (cellGroups.includes(RunGroup.two.toString())) {
+                group2Cells.add(cell.document.uri);
+                group2Documents.add(cell.notebook.uri);
+            }
+            if (cellGroups.includes(RunGroup.three.toString())) {
+                group3Cells.add(cell.document.uri);
+                group3Documents.add(cell.notebook.uri);
+            }
+        });
+    });
 
-    if (currentValue.includes('1')) {
-        vscode.commands.executeCommand('setContext', 'notebookRunGroups.inGroupOne', true);
-    } else {
-        vscode.commands.executeCommand('setContext', 'notebookRunGroups.inGroupOne', false);
-    }
-
-    if (currentValue.includes('2')) {
-        vscode.commands.executeCommand('setContext', 'notebookRunGroups.inGroupTwo', true);
-    } else {
-        vscode.commands.executeCommand('setContext', 'notebookRunGroups.inGroupTwo', false);
-    }
-
-    if (currentValue.includes('3')) {
-        vscode.commands.executeCommand('setContext', 'notebookRunGroups.inGroupThree', true);
-    } else {
-        vscode.commands.executeCommand('setContext', 'notebookRunGroups.inGroupThree', false);
-    }
+    // Set the actual contexts
+    vscode.commands.executeCommand('setContext', 'notebookRunGroups.groupOneCells', Array.from(group1Cells));
+    vscode.commands.executeCommand('setContext', 'notebookRunGroups.groupOneDocuments', Array.from(group1Documents));
+    vscode.commands.executeCommand('setContext', 'notebookRunGroups.groupTwoCells', Array.from(group2Cells));
+    vscode.commands.executeCommand('setContext', 'notebookRunGroups.groupTwoDocuments', Array.from(group2Documents));
+    vscode.commands.executeCommand('setContext', 'notebookRunGroups.groupThreeCells', Array.from(group3Cells));
+    vscode.commands.executeCommand('setContext', 'notebookRunGroups.groupThreeDocuments', Array.from(group3Documents));
 }
