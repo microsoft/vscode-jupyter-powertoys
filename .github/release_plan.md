@@ -1,0 +1,7 @@
+- [ ] Review [Component Governance](https://dev.azure.com/monacotools/Monaco/_componentGovernance/193011) and resolve all High/Severe issues.
+- [ ] In package.json make sure to update the `version` and the `engine:vscode` properties to the values needed to support any new features. 
+- [ ] Update the `README.md` file with basic usage information for any new features added.
+- [ ] Trigger a manual run on the PowerToys [build definition](https://dev.azure.com/monacotools/Monaco/_build?definitionId=305).
+- [ ] From the triggered run, download the extension from the Artifacts.
+- [ ] Sniff test the built extension on VS Code and VS Code - Insiders.
+- [ ] Approve the publish step on the manually triggered run.
