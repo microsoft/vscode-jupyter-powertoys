@@ -22,9 +22,9 @@
         "url": "https://github.com/Microsoft/vscode-jupyter-powertoys/issues"
     },
     "qna": "https://github.com/microsoft/vscode-jupyter-powertoys/discussions",
-    "version": "0.0.6",
+    "version": "0.0.7",
     "engines": {
-        "vscode": "^1.70.0"
+        "vscode": "^1.78.0"
     },
     "extensionDependencies": [
         "ms-toolsai.jupyter"
@@ -168,6 +168,12 @@
                 "title": "Create Interactive Window",
                 "category": "Notebook",
                 "icon": "$(window)"
+            },
+            {
+                "command": "jupyter-kernelManager.createnewnotebook",
+                "title": "Create Jupyter Notebook",
+                "category": "Notebook",
+                "icon": "$(notebook)"
             },
             {
                 "command": "jupyter.notebookeditor.openContextualHelp",
@@ -363,6 +369,11 @@
                     "group": "inline"
                 },
                 {
+                    "command": "jupyter-kernelManager.createnewnotebook",
+                    "when": "viewItem =~ /kernelSpec:/ || viewItem =~ /remote:activeKernel:/",
+                    "group": "inline"
+                },
+                {
                     "command": "jupyter-kernelManager.shutdownKernel",
                     "when": "view == jupyterKernelsView && viewItem =~ /activeKernel:/",
                     "group": "inline"
@@ -526,6 +537,7 @@
         "@types/node": "16.11.07",
         "@types/react-dom": "^17.0.11",
         "@types/redux-logger": "^3.0.9",
+        "@types/webpack-env": "^1.18.0",
         "@typescript-eslint/eslint-plugin": "^5.1.0",
         "@typescript-eslint/parser": "^5.1.0",
         "@vscode/test-electron": "^1.6.2",
@@ -554,9 +566,9 @@
         "tslib": "^2.3.1",
         "typescript": "^4.4.4",
         "vscode-dts": "^0.3.3",
-        "webpack": "^5.72.0",
-        "webpack-bundle-analyzer": "^4.5.0",
-        "webpack-cli": "^4.9.2",
+        "webpack": "^5.77.0",
+        "webpack-bundle-analyzer": "^4.8.0",
+        "webpack-cli": "^5.0.1",
         "webpack-fix-default-import-plugin": "^1.0.3"
     },
     "dependencies": {
@@ -564,7 +576,6 @@
         "@jupyterlab/nbformat": "^3.2.5",
         "@jupyterlab/services": "^6.3.2",
         "@loadable/component": "^5.15.2",
-        "@types/webpack-env": "^1.16.4",
         "ansi-regex": "^6.0.1",
         "ansi-to-html": "^0.7.2",
         "crypto": "^1.0.1",
@@ -582,6 +593,8 @@
         "untildify": "^4.0.0"
     },
     "overrides": {
-        "terser@<5.14.2": "5.14.2"
+        "json5": "2.2.2",
+        "terser@<5.14.2": "5.14.2",
+        "loader-utils": "3.2.1"
     }
 }

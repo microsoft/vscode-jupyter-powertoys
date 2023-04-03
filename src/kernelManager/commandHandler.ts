@@ -2,20 +2,24 @@
 // Licensed under the MIT License.
 import { commands, Disposable, ExtensionContext, Uri, window, workspace } from 'vscode';
 import { iPyNbNameToTemporarilyStartKernel, KernelTreeView } from './kernelTreeView';
-import { IExportedKernelService } from './vscodeJupyter';
+import { IExportedKernelService, JupyterAPI } from './vscodeJupyter';
 import * as path from '../vscode-path/path';
 import { IActiveLocalKernelTreeNode, IActiveRemoteKernelTreeNode, IKernelSpecTreeNode } from './types';
 
 export class CommandHandler {
     private readonly disposables: Disposable[] = [];
-    constructor(private readonly kernelService: IExportedKernelService, private readonly context: ExtensionContext) {
+    constructor(
+        private readonly kernelService: IExportedKernelService,
+        private readonly context: ExtensionContext,
+        private readonly jupyterApi: JupyterAPI
+    ) {
         this.addCommandHandlers();
     }
     public dispose() {
         this.disposables.forEach((d) => d.dispose());
     }
-    public static register(kernelService: IExportedKernelService, context: ExtensionContext) {
-        context.subscriptions.push(new CommandHandler(kernelService, context));
+    public static register(kernelService: IExportedKernelService, context: ExtensionContext, jupyterApi: JupyterAPI) {
+        context.subscriptions.push(new CommandHandler(kernelService, context, jupyterApi));
     }
     private addCommandHandlers() {
         this.disposables.push(
@@ -29,6 +33,9 @@ export class CommandHandler {
         );
         this.disposables.push(
             commands.registerCommand('jupyter-kernelManager.createnewinteractive', this.createInteractiveWindow, this)
+        );
+        this.disposables.push(
+            commands.registerCommand('jupyter-kernelManager.createnewnotebook', this.createNotebook, this)
         );
         this.disposables.push(
             commands.registerCommand('jupyter-kernelManager.editKernelSpec', this.editKernelSpec, this)
@@ -63,6 +70,32 @@ export class CommandHandler {
             }
         }
         void commands.executeCommand('jupyter.createnewinteractive', node.kernelConnectionMetadata);
+    }
+    private async createNotebook(node: IActiveRemoteKernelTreeNode | IActiveLocalKernelTreeNode | IKernelSpecTreeNode) {
+        if (node.kernelConnectionMetadata.kind === 'startUsingRemoteKernelSpec' && node.type === 'activeRemoteKernel') {
+            const kernel = node.uri ? this.kernelService.getKernel(node.uri) : undefined;
+            const activeKernels = await this.kernelService.getKernelSpecifications(true);
+            const activeKernelSpecConnection =
+                kernel &&
+                activeKernels.find(
+                    (item) =>
+                        item.kind === 'connectToLiveRemoteKernel' &&
+                        item.kernelModel.id === kernel?.connection.connection.id
+                );
+            if (activeKernelSpecConnection) {
+                const notebook = await commands.executeCommand('ipynb.newUntitledIpynb');
+                console.log(notebook);
+                return;
+            }
+        }
+        await commands.executeCommand('ipynb.newUntitledIpynb');
+        const nb = window.activeNotebookEditor?.notebook;
+        if (!nb) {
+            return;
+        }
+        this.jupyterApi.openNotebook(nb.uri, node.kernelConnectionMetadata.id);
+
+        console.log(nb);
     }
     private async isValidConnection(a: IActiveRemoteKernelTreeNode | IActiveLocalKernelTreeNode) {
         // Possible the kernel has already been shutdown.
