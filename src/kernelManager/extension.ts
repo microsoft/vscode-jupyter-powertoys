@@ -28,7 +28,7 @@ export async function activate(context: ExtensionContext) {
         if (!kernelService) {
             return;
         }
-        CommandHandler.register(kernelService, context);
+        CommandHandler.register(kernelService, context, jupyterExt.exports);
         KernelTreeView.register(kernelService, context.subscriptions);
     }
 
