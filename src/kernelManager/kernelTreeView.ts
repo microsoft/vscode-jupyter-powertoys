@@ -665,6 +665,12 @@ export class KernelTreeView implements TreeDataProvider<Node> {
                             }
                         }
 
+                        if (
+                            item.metadata.kind === 'connectToLiveRemoteKernel' &&
+                            item.metadata.baseUrl !== element.baseUrl
+                        ) {
+                            return;
+                        }
                         activeRemoteKernelNodes.push(<IActiveRemoteKernelTreeNode>{
                             type: 'activeRemoteKernel',
                             kernelConnectionMetadata: item.metadata,
