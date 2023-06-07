@@ -153,7 +153,7 @@ export class CommandHandler {
             return;
         }
         if (a.uri) {
-            void commands.executeCommand('jupyter.notebookeditor.restartkernel', a.uri);
+            void commands.executeCommand('jupyter.restartkernel', a.uri);
             return;
         }
         if (this.context.globalState.get<boolean>('dontAskRestartKernel', false)) {
