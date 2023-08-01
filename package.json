@@ -22,7 +22,7 @@
         "url": "https://github.com/Microsoft/vscode-jupyter-powertoys/issues"
     },
     "qna": "https://github.com/microsoft/vscode-jupyter-powertoys/discussions",
-    "version": "0.0.8",
+    "version": "0.0.9",
     "engines": {
         "vscode": "^1.78.0"
     },
@@ -576,11 +576,11 @@
         "webpack-fix-default-import-plugin": "^1.0.3"
     },
     "dependencies": {
-        "@jupyterlab/coreutils": "^5.2.5",
-        "@jupyterlab/nbformat": "^3.2.5",
-        "@jupyterlab/services": "^6.3.2",
+        "@jupyterlab/coreutils": "^6.0.3",
+        "@jupyterlab/nbformat": "^4.0.3",
+        "@jupyterlab/services": "^7.0.3",
         "@loadable/component": "^5.15.2",
-        "@nteract/transforms": "^3.2.0",
+        "@nteract/transforms": "^5.0.4-alpha.0",
         "ansi-regex": "^6.0.1",
         "ansi-to-html": "^0.7.2",
         "fs-extra": "^10.0.1",
@@ -597,11 +597,10 @@
         "untildify": "^4.0.0"
     },
     "overrides": {
+        "trim@<1.0.0":"1.0.1",
         "json5": "2.2.2",
-        "terser@<5.14.2": "5.14.2",
-        "minimist@<1.2.8": "1.2.8",
         "moment@<2.29.4": "2.29.4",
-        "word-wrap@<1.2.4": "1.2.4",
+        "terser@<5.14.2": "5.14.2",
         "semver@<5.7.1": "5.7.2",
         "loader-utils": "3.2.1"
     }
