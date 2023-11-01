@@ -23,8 +23,8 @@ extends:
     parameters:
         publishExtension: ${{ parameters.publishExtension }}
         buildSteps:
-            - script: npm i -g npm@8.15.1
-              displayName: npm install npm@8.15.1
+            - script: npm i -g npm@9.5.0
+              displayName: npm install npm@9.5.0
 
             - script: npm ci
               displayName: Install dependencies
