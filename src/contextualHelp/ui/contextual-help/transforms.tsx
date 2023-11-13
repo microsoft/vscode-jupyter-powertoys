@@ -36,10 +36,6 @@ const mimeTypeToImport: TransformData[] = [
         const module = await import(/* webpackChunkName: "nteract_transforms" */ '@nteract/transforms');
         return module.JSONTransform;
     }),
-    new TransformData('application/javascript', async () => {
-        const module = await import(/* webpackChunkName: "nteract_transforms" */ '@nteract/transforms');
-        return module.JavaScriptTransform;
-    }),
     new TransformData('text/markdown', async () => {
         const module = await import(/* webpackChunkName: "nteract_transforms" */ '@nteract/transforms');
         return module.MarkdownTransform;
