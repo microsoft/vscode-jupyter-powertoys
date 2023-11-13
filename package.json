@@ -22,9 +22,9 @@
         "url": "https://github.com/Microsoft/vscode-jupyter-powertoys/issues"
     },
     "qna": "https://github.com/microsoft/vscode-jupyter-powertoys/discussions",
-    "version": "0.0.9",
+    "version": "0.1.0",
     "engines": {
-        "vscode": "^1.78.0"
+        "vscode": "^1.85.0"
     },
     "extensionDependencies": [
         "ms-toolsai.jupyter"
@@ -43,15 +43,12 @@
         "Notebooks",
         "Visualization"
     ],
-    "enabledApiProposals": [
-        "notebookWorkspaceEdit"
-    ],
+    "enabledApiProposals": [],
     "main": "./out/main.js",
     "browser": "./out/web.main.js",
     "activationEvents": [
         "onNotebook:jupyter-notebook",
-        "onNotebook:interactive",
-        "onView:jupyterKernelsView"
+        "onNotebook:interactive"
     ],
     "contributes": {
         "commands": [
@@ -528,8 +525,7 @@
         "lint": "eslint src --ext ts",
         "test": "node ./out/test/runTest.js",
         "postinstall": "npm run download-api",
-        "download-api": "npx vscode-dts dev",
-        "postdownload-api": "npx vscode-dts main",
+        "download-api": "npx vscode-dts 1.84.0",
         "compiled": "deemon npm run watch",
         "kill-compiled": "deemon --kill npm run watch"
     },
@@ -597,7 +593,7 @@
         "untildify": "^4.0.0"
     },
     "overrides": {
-        "trim@<1.0.0":"1.0.1",
+        "trim@<1.0.0": "1.0.1",
         "json5": "2.2.2",
         "moment@<2.29.4": "2.29.4",
         "terser@<5.14.2": "5.14.2",

@@ -62,7 +62,7 @@ export class CommandHandler {
                 activeKernels.find(
                     (item) =>
                         item.kind === 'connectToLiveRemoteKernel' &&
-                        item.kernelModel.id === kernel?.connection.connection.id
+                        item.kernelModel.id === kernel?.connection?.kernel?.id
                 );
             if (activeKernelSpecConnection) {
                 void commands.executeCommand('jupyter.createnewinteractive', activeKernelSpecConnection);
@@ -80,7 +80,7 @@ export class CommandHandler {
                 activeKernels.find(
                     (item) =>
                         item.kind === 'connectToLiveRemoteKernel' &&
-                        item.kernelModel.id === kernel?.connection.connection.id
+                        item.kernelModel.id === kernel?.connection?.kernel?.id
                 );
             if (activeKernelSpecConnection) {
                 const notebook = await commands.executeCommand('ipynb.newUntitledIpynb');
@@ -206,13 +206,13 @@ export class CommandHandler {
         if (!(await this.isValidConnection(a))) {
             return;
         }
-        if (!a.connection?.connection) {
+        if (!a.connection?.kernel) {
             // Check if we already have an active connection for this.
             // If this is a remote kernel and we have already connected to this, then we can just shutdown that kernel.
             if (a.kernelConnectionMetadata.kind === 'startUsingRemoteKernelSpec' && a.uri) {
                 const kernel = this.kernelService.getKernel(a.uri);
                 if (kernel) {
-                    return kernel.connection.connection;
+                    return kernel.connection.kernel;
                 }
                 KernelTreeView.refresh(a.parent);
                 return;
@@ -228,12 +228,12 @@ export class CommandHandler {
                     iPyNbNameToTemporarilyStartKernel
                 );
                 const kernel = await this.kernelService.startKernel(a.kernelConnectionMetadata, Uri.file(filePath));
-                return kernel.connection;
+                return kernel.kernel;
             } catch (ex) {
                 console.error('Failed to shutdown kernel', ex);
             }
             KernelTreeView.refresh(a.parent);
         }
-        return a.connection?.connection;
+        return a.connection?.kernel;
     }
 }

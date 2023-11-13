@@ -257,11 +257,11 @@ class ActiveLocalOrRemoteKernelConnectionTreeItem extends TreeItem {
         this.resourceUri = ext ? Uri.parse(`one${ext}`) : undefined;
         this.iconPath = new ThemeIcon('file');
         const prefix = data.type === 'activeLocalKernel' ? 'local' : 'remote';
-        this.contextValue = `${prefix}:activeKernel:${this.data.connection?.connection.status || 'dead'}`;
+        this.contextValue = `${prefix}:activeKernel:${this.data.connection?.kernel?.status || 'dead'}`;
         console.log(this.contextValue);
         const tooltips: string[] = [];
-        if (this.data.connection?.connection.status) {
-            tooltips.push(`Status ${this.data.connection?.connection.status}`);
+        if (this.data.connection?.kernel?.status) {
+            tooltips.push(`Status ${this.data.connection?.kernel?.status}`);
         }
         if (data.kernelConnectionMetadata.kind === 'connectToLiveRemoteKernel') {
             if (tooltips.length === 0 && data.kernelConnectionMetadata.kernelModel.execution_state) {
@@ -280,17 +280,17 @@ class ActiveLocalOrRemoteKernelConnectionTreeItem extends TreeItem {
             //     tooltips.push(`${connections} connection(s)`);
             // }
         }
-        if (this.data.connection?.connection.connectionStatus) {
-            tooltips.push(`Connection ${this.data.connection?.connection.connectionStatus}`);
+        if (this.data.connection?.kernel?.status) {
+            tooltips.push(`Connection ${this.data.connection?.kernel?.status}`);
         }
         this.tooltip = tooltips.length
             ? tooltips.join(', ')
             : (this.description as string) || (this.label as string) || '';
         if (this.data.connection) {
-            if (this.data.connection.connection.connectionStatus !== 'connected') {
-                this.updateIcon(this.data.connection.connection.connectionStatus);
-            } else {
-                this.updateIcon(this.data.connection.connection.status);
+            if (this.data.connection.kernel?.connectionStatus !== 'connected' && this.data.connection.kernel) {
+                this.updateIcon(this.data.connection.kernel?.connectionStatus);
+            } else if (this.data.connection.kernel) {
+                this.updateIcon(this.data.connection.kernel?.status);
             }
         }
     }
@@ -608,7 +608,7 @@ export class KernelTreeView implements TreeDataProvider<Node> {
                                     remoteActiveKernelStartedUsingConnectToRemoveKernelSpec.some((activeRemote) => {
                                         const kernel =
                                             activeRemote.uri && this.kernelService.getKernel(activeRemote.uri);
-                                        return kernel?.connection.connection.id === item.kernelModel.id;
+                                        return kernel?.connection.kernel?.id === item.kernelModel.id;
                                     })
                                 ) {
                                     return;
@@ -660,7 +660,11 @@ export class KernelTreeView implements TreeDataProvider<Node> {
                         // Sometimes we start kernels just to kill them.
                         if (item.metadata.kind === 'startUsingRemoteKernelSpec' && item.uri) {
                             const kernel = this.kernelService.getKernel(item.uri);
-                            if (kernel && uniqueKernelIds.has(kernel.connection.connection.id)) {
+                            if (
+                                kernel &&
+                                kernel.connection.kernel &&
+                                uniqueKernelIds.has(kernel.connection.kernel?.id)
+                            ) {
                                 return;
                             }
                         }
@@ -778,15 +782,15 @@ export class KernelTreeView implements TreeDataProvider<Node> {
         const onStatusChanged = () => {
             this._onDidChangeTreeData.fire(localActiveKernel);
         };
-        localActiveKernel.connection.connection.connectionStatusChanged.connect(onConnectionStatusChanged, this);
-        localActiveKernel.connection.connection.statusChanged.connect(onStatusChanged, this);
+        localActiveKernel.connection.kernel?.connectionStatusChanged.connect(onConnectionStatusChanged, this);
+        localActiveKernel.connection.kernel?.statusChanged.connect(onStatusChanged, this);
         const disposable = new Disposable(() => {
             if (localActiveKernel.connection) {
-                localActiveKernel.connection.connection.connectionStatusChanged.disconnect(
+                localActiveKernel.connection.kernel?.connectionStatusChanged.disconnect(
                     onConnectionStatusChanged,
                     this
                 );
-                localActiveKernel.connection.connection.statusChanged.disconnect(onStatusChanged, this);
+                localActiveKernel.connection.kernel?.statusChanged.disconnect(onStatusChanged, this);
             }
         });
         this.disposables.push(disposable);
