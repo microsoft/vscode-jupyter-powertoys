@@ -525,8 +525,7 @@
         "lint": "eslint src --ext ts",
         "test": "node ./out/test/runTest.js",
         "postinstall": "npm run download-api",
-        "download-api": "npx vscode-dts dev",
-        "postdownload-api": "npx vscode-dts main",
+        "download-api": "npx vscode-dts 1.84.0",
         "compiled": "deemon npm run watch",
         "kill-compiled": "deemon --kill npm run watch"
     },
