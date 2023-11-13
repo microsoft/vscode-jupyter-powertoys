@@ -9,10 +9,11 @@ import {
 } from '../kernelManager/types';
 import { commands, Disposable, env, EventEmitter, ThemeIcon, TreeItem, TreeItemCollapsibleState } from 'vscode';
 import { IActiveKernelChildNodesProvider } from '../kernelManager/kernelChildNodeProvider';
-import { IExportedKernelService, IKernelConnectionInfo } from '../kernelManager/vscodeJupyter';
+import { IExportedKernelService } from '../kernelManager/vscodeJupyter';
 import { IAnyMessageArgs, IKernelConnection } from '@jupyterlab/services/lib/kernel/kernel';
 import { Kernel, KernelMessage } from '@jupyterlab/services/lib/kernel';
 import { IIOPubMessage, IMessage, IOPubMessageType, MessageType } from '@jupyterlab/services/lib/kernel/messages';
+import type { Session } from '@jupyterlab/services';
 
 type RootNode = ICustomNodeFromAnotherProvider & {
     __type: 'rootNode';
@@ -390,14 +391,14 @@ export class ActiveKernelMessageProvider implements IActiveKernelChildNodesProvi
             return [];
         }
         if (node.type === 'activeLocalKernel' || node.type === 'activeRemoteKernel') {
-            if (!node.connection) {
+            if (!node.connection?.kernel) {
                 return [];
             }
             const rootNode: RootNode = {
                 type: 'customNodeFromAnotherProvider',
                 __type: 'rootNode',
                 providerId: this.id,
-                connection: node.connection.connection
+                connection: node.connection.kernel
             };
             this.addHandler(node.connection, rootNode);
             return [rootNode];
@@ -583,29 +584,30 @@ export class ActiveKernelMessageProvider implements IActiveKernelChildNodesProvi
         return this.messagesByConnection.get(connection)!;
     }
 
-    private addHandler(connection: IKernelConnectionInfo, parent?: RootNode) {
-        if (this.connections.has(connection.connection)) {
-            if (parent && !this.connections.get(connection.connection)) {
-                this.connections.set(connection.connection, parent);
+    private addHandler(connection: Session.ISessionConnection, parent?: RootNode) {
+        if (connection.kernel && this.connections.has(connection.kernel)) {
+            if (parent && !this.connections.get(connection.kernel)) {
+                this.connections.set(connection.kernel, parent);
             }
             return;
         }
-        this.connections.set(connection.connection, parent);
+        if (!connection.kernel) {
+            return;
+        }
+        this.connections.set(connection.kernel, parent);
         const anyHandler = this.onAnyMessageHandler.bind(this, parent);
-        connection.connection.anyMessage.connect(anyHandler, this);
-        this.disposables.push(new Disposable(() => connection.connection.anyMessage.disconnect(anyHandler)));
+        connection.kernel.anyMessage.connect(anyHandler, this);
+        this.disposables.push(new Disposable(() => connection.kernel!.anyMessage.disconnect(anyHandler)));
 
         const ioPubHandler = this.onIOPubMessageHandler.bind(this, parent);
 
-        connection.connection.iopubMessage.connect(ioPubHandler, this);
-        this.disposables.push(new Disposable(() => connection.connection.iopubMessage.disconnect(ioPubHandler)));
+        connection.kernel.iopubMessage.connect(ioPubHandler, this);
+        this.disposables.push(new Disposable(() => connection.kernel!.iopubMessage.disconnect(ioPubHandler)));
 
         const unhandledHandler = this.onUnhandledMessageHandler.bind(this, parent);
 
-        connection.connection.unhandledMessage.connect(unhandledHandler, this);
-        this.disposables.push(
-            new Disposable(() => connection.connection.unhandledMessage.disconnect(unhandledHandler))
-        );
+        connection.kernel.unhandledMessage.connect(unhandledHandler, this);
+        this.disposables.push(new Disposable(() => connection.kernel!.unhandledMessage.disconnect(unhandledHandler)));
     }
     private onAnyMessageHandler(
         root: RootNode | undefined,

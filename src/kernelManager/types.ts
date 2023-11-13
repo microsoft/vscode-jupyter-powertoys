@@ -2,13 +2,13 @@
 // Licensed under the MIT License.
 import { Uri } from 'vscode';
 import {
-    IKernelConnectionInfo,
     KernelConnectionMetadata,
     LiveRemoteKernelConnectionMetadata,
     LocalKernelSpecConnectionMetadata,
     PythonKernelConnectionMetadata,
     RemoteKernelSpecConnectionMetadata
 } from './vscodeJupyter';
+import type { Session } from '@jupyterlab/services';
 
 export type Node =
     | IServerTreeNode
@@ -51,14 +51,14 @@ export interface IActiveLocalKernelTreeNode {
     type: 'activeLocalKernel';
     kernelConnectionMetadata: LocalKernelSpecConnectionMetadata | PythonKernelConnectionMetadata;
     uri: Uri;
-    connection: IKernelConnectionInfo;
+    connection: Session.ISessionConnection;
     parent: Node;
 }
 export interface IActiveRemoteKernelTreeNode {
     type: 'activeRemoteKernel';
     kernelConnectionMetadata: LiveRemoteKernelConnectionMetadata | RemoteKernelSpecConnectionMetadata;
     uri?: Uri;
-    connection?: IKernelConnectionInfo;
+    connection?: Session.ISessionConnection;
     parent: Node;
 }
 export interface ICustomNodeFromAnotherProvider {

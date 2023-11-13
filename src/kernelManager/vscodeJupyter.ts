@@ -246,24 +246,12 @@ export interface IKernelSocket {
     removeSendHook(hook: (data: any, cb?: (err?: Error) => void) => Promise<void>): void;
 }
 
-export type IKernelConnectionInfo = {
-    /**
-     * Gives access to the jupyterlab Kernel.IKernelConnection object.
-     */
-    connection: Kernel.IKernelConnection;
-    /**
-     * Underlying socket used by jupyterlab/services to communicate with kernel.
-     * See jupyterlab/services/kernel/default.ts
-     */
-    kernelSocket: IKernelSocket;
-};
-
 export interface IExportedKernelService {
     /**
      * List of running kernels changed.
      */
     onDidChangeKernels: Event<void>;
-    onDidStartKernel: Event<{ metadata: KernelConnectionMetadata; connection: IKernelConnectionInfo }>;
+    onDidStartKernel: Event<{ metadata: KernelConnectionMetadata; connection: Session.ISessionConnection }>;
     /**
      * List of kernel specs changed.
      */
@@ -285,7 +273,7 @@ export interface IExportedKernelService {
      * Gets the Kernel connection & the metadata that's associated with a given resource.
      * (only successfully started/active connections are returned).
      */
-    getKernel(uri: Uri): { metadata: KernelConnectionMetadata; connection: IKernelConnectionInfo } | undefined;
+    getKernel(uri: Uri): { metadata: KernelConnectionMetadata; connection: Session.ISessionConnection } | undefined;
     /**
      * Starts a kernel for a given resource.
      * The promise is resolved only after the kernel has successfully started.
@@ -295,11 +283,11 @@ export interface IExportedKernelService {
         metadata: KernelConnectionMetadata,
         uri: Uri,
         token?: CancellationToken
-    ): Promise<IKernelConnectionInfo>;
+    ): Promise<Session.ISessionConnection>;
     /**
      * Connects an existing kernel to a resource.
      * The promise is resolved only after the kernel is successfully attached to a resource.
      * If one attempts to start another kernel or connect another kernel for the same resource, the same promise is returned.
      */
-    connect(metadata: LiveRemoteKernelConnectionMetadata, uri: Uri): Promise<IKernelConnectionInfo>;
+    connect(metadata: LiveRemoteKernelConnectionMetadata, uri: Uri): Promise<Session.ISessionConnection>;
 }

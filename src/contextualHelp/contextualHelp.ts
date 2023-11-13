@@ -33,7 +33,10 @@ export class ContextualHelp extends WebviewViewHost<MessageMapping> implements v
         }
         return undefined;
     }
-    constructor(provider: IWebviewViewProvider, private readonly statusProvider: StatusProvider) {
+    constructor(
+        provider: IWebviewViewProvider,
+        private readonly statusProvider: StatusProvider
+    ) {
         super(provider, (c, d) => new SimpleMessageListener(c, d), root, [path.join(root, 'contextualHelp.js')]);
 
         // Sign up if the active variable view notebook is changed, restarted or updated
@@ -203,8 +206,8 @@ export class ContextualHelp extends WebviewViewHost<MessageMapping> implements v
             const kernel = await this.getKernel(document);
 
             const result =
-                kernel && code && code.length > 0
-                    ? await kernel.connection.connection.requestInspect({ code, cursor_pos, detail_level })
+                kernel && code && code.length > 0 && kernel.connection.kernel
+                    ? await kernel.connection.kernel.requestInspect({ code, cursor_pos, detail_level })
                     : undefined;
             if (result && result.content.status === 'ok' && 'text/plain' in result.content.data) {
                 const output: nbformat.IStream = {
@@ -295,9 +298,6 @@ export class ContextualHelp extends WebviewViewHost<MessageMapping> implements v
                     const exports = extension.exports as JupyterAPI;
                     if (exports && (exports as any).getKernelService) {
                         this.kernelService = await exports.getKernelService();
-                        this.kernelService
-                            ?.getKernel(notebook.uri)
-                            ?.connection.kernelSocket?.onDidChange(this.activeKernelChanged, this, disposables);
                         this.kernelService?.onDidChangeKernels(this.activeKernelChanged, this, disposables);
                     }
                 }
