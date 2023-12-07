@@ -272,6 +272,12 @@
                     "title": "%jupyter.command.jupyter.openContextualHelp.title%",
                     "category": "Notebook",
                     "enablement": "isWorkspaceTrusted && jupyter.ispythonnotebook && config.jupyter.contextualHelp.enabled"
+                },
+                {
+                    "command": "jupyter-kernelManager.restartKernel",
+                    "title": "Restart Kernel",
+                    "category": "Notebook",
+                    "when": "false"
                 }
             ],
             "notebook/toolbar": [
