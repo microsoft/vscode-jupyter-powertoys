@@ -1,9 +1,11 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
-import { EnvironmentType, PythonEnvironment } from './vscodeJupyter';
+import { PythonExtension } from '@vscode/python-extension';
+import { EnvironmentType, PythonEnvironment, getCachedEnvironmentTypeFromUri } from './vscodeJupyter';
 
-export function getPythonEnvironmentCategory(interpreter: PythonEnvironment) {
-    switch (interpreter.envType) {
+export function getPythonEnvironmentCategory(interpreter: PythonEnvironment, pythonApi: PythonExtension) {
+    const envType = getCachedEnvironmentTypeFromUri(interpreter.uri, pythonApi);
+    switch (envType) {
         case EnvironmentType.Conda:
             return 'Conda Env';
         case EnvironmentType.Pipenv:
