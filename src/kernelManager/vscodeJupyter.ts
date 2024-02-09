@@ -3,9 +3,11 @@
 // Licensed under the MIT License.
 /* eslint-disable */
 
+import * as path from '../vscode-path/path';
 import { CancellationToken, Event, NotebookDocument, Uri } from 'vscode';
 import type { Kernel } from '@jupyterlab/services/lib/kernel';
 import type { Session } from '@jupyterlab/services';
+import { Environment, KnownEnvironmentTools, ResolvedEnvironment, PythonExtension } from '@vscode/python-extension';
 
 /**
  * Data represents the message payload received over the WebSocket.
@@ -63,15 +65,9 @@ export type PythonVersion = {
      */
     prerelease: string[];
 };
-export type PythonEnvironment = {
-    displayName?: string;
+export interface PythonEnvironment {
     uri: Uri;
-    version?: PythonVersion;
-    sysPrefix: string;
-    envType?: EnvironmentType;
-    envName?: string;
-    envPath?: Uri;
-};
+}
 
 /**
  * Details of the kernel spec.
@@ -290,4 +286,115 @@ export interface IExportedKernelService {
      * If one attempts to start another kernel or connect another kernel for the same resource, the same promise is returned.
      */
     connect(metadata: LiveRemoteKernelConnectionMetadata, uri: Uri): Promise<Session.ISessionConnection>;
+}
+
+const KnownEnvironmentToolsToEnvironmentTypeMapping = new Map<KnownEnvironmentTools, EnvironmentType>([
+    ['Conda', EnvironmentType.Conda],
+    ['Pipenv', EnvironmentType.Pipenv],
+    ['Poetry', EnvironmentType.Poetry],
+    ['Pyenv', EnvironmentType.Pyenv],
+    ['Unknown', EnvironmentType.Unknown],
+    ['Venv', EnvironmentType.Venv],
+    ['VirtualEnv', EnvironmentType.VirtualEnv],
+    ['VirtualEnvWrapper', EnvironmentType.VirtualEnvWrapper]
+]);
+export async function getEnvironmentTypeFromUri(uri: Uri | undefined, api: PythonExtension) {
+    if (!uri) {
+        return;
+    }
+    const env = api.environments.known.find(
+        (e) => e.executable.uri?.fsPath?.toLowerCase() === uri.fsPath.toLowerCase()
+    );
+    if (env) {
+        return getEnvironmentType(env);
+    }
+    const resolved = await api.environments.resolveEnvironment(uri.fsPath);
+    if (!resolved) {
+        return;
+    }
+    return getEnvironmentType(resolved);
+}
+export function getCachedEnvironmentTypeFromUri(uri: Uri | undefined, api: PythonExtension) {
+    if (!uri) {
+        return;
+    }
+    const env = api.environments.known.find(
+        (e) => e.executable.uri?.fsPath?.toLowerCase() === uri.fsPath.toLowerCase()
+    );
+    if (env) {
+        return getEnvironmentType(env);
+    }
+}
+export async function getEnvironmentVersionFromUri(uri: Uri | undefined, api: PythonExtension) {
+    if (!uri) {
+        return;
+    }
+    const env = api.environments.known.find(
+        (e) => e.executable.uri?.fsPath?.toLowerCase() === uri.fsPath.toLowerCase()
+    );
+    if (env) {
+        return env.version;
+    }
+    const resolved = await api.environments.resolveEnvironment(uri.fsPath);
+    return resolved?.version;
+}
+export function getEnvironmentType({ tools }: Environment | ResolvedEnvironment) {
+    tools = tools.map((tool) => tool.toLowerCase());
+    for (const tool of tools) {
+        if (tool === EnvironmentType.Conda.toLowerCase()) {
+            return EnvironmentType.Conda;
+        }
+        if (tool === EnvironmentType.Venv.toLowerCase()) {
+            return EnvironmentType.Venv;
+        }
+        if (tool === EnvironmentType.VirtualEnv.toLowerCase()) {
+            return EnvironmentType.VirtualEnv;
+        }
+        if (tool === EnvironmentType.VirtualEnvWrapper.toLowerCase()) {
+            return EnvironmentType.VirtualEnvWrapper;
+        }
+        if (tool === EnvironmentType.Poetry.toLowerCase()) {
+            return EnvironmentType.Poetry;
+        }
+        if (tool === EnvironmentType.Pipenv.toLowerCase()) {
+            return EnvironmentType.Pipenv;
+        }
+        if (tool === EnvironmentType.Pyenv.toLowerCase()) {
+            return EnvironmentType.Pyenv;
+        }
+        if (KnownEnvironmentToolsToEnvironmentTypeMapping.has(tool as unknown as KnownEnvironmentTools)) {
+            return KnownEnvironmentToolsToEnvironmentTypeMapping.get(tool as unknown as KnownEnvironmentTools)!;
+        }
+    }
+    return EnvironmentType.Unknown;
+}
+
+export async function getPythonEnvironmentName(uri: Uri | undefined, api: PythonExtension) {
+    if (!uri) {
+        return '';
+    }
+    const env = api.environments.known.find(
+        (e) => e.executable.uri?.fsPath?.toLowerCase() === uri.fsPath.toLowerCase()
+    );
+    if (env) {
+        if (env.environment?.name) {
+            return env.environment.name;
+        }
+        if (getEnvironmentType(env) === EnvironmentType.Conda) {
+            if (env.environment?.folderUri) {
+                return path.basename(env.environment.folderUri.fsPath);
+            }
+        }
+    }
+    const resolved = await api.environments.resolveEnvironment(uri.fsPath);
+    if (resolved) {
+        if (resolved.environment?.name) {
+            return resolved.environment.name;
+        }
+        if (getEnvironmentType(resolved) === EnvironmentType.Conda) {
+            if (resolved.environment?.folderUri) {
+                return path.basename(resolved.environment.folderUri.fsPath);
+            }
+        }
+    }
 }
