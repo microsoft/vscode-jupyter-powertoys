@@ -4,3 +4,4 @@ vscode.d.ts
 vscode.*.d.ts
 .vscode-test
 *.vsix
+.venv/
