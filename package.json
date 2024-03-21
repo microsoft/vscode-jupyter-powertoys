@@ -22,9 +22,9 @@
         "url": "https://github.com/Microsoft/vscode-jupyter-powertoys/issues"
     },
     "qna": "https://github.com/microsoft/vscode-jupyter-powertoys/discussions",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "engines": {
-        "vscode": "^1.87.0"
+        "vscode": "^1.88.0"
     },
     "extensionDependencies": [
         "ms-toolsai.jupyter"

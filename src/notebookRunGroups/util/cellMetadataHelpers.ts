@@ -17,16 +17,31 @@ export function getCellRunGroupMetadata(cell: vscode.NotebookCell): string {
 // Update cell metadata with the new run group value
 export function updateCellRunGroupMetadata(cell: vscode.NotebookCell, newGroupValue: string) {
     const newMetadata = { ...(cell.metadata || {}) };
-    newMetadata.custom = newMetadata.custom || {};
-    newMetadata.custom.metadata = newMetadata.custom.metadata || {};
-    newMetadata.custom.metadata.notebookRunGroups = newMetadata.custom.metadata.notebookRunGroups || {};
+    if (useCustomMetadata()) {
+        newMetadata.custom = newMetadata.custom || {};
+        newMetadata.custom.metadata = newMetadata.custom.metadata || {};
+        newMetadata.custom.metadata.notebookRunGroups = newMetadata.custom.metadata.notebookRunGroups || {};
 
-    // Replace the actual groupValue
-    newMetadata.custom.metadata.notebookRunGroups.groupValue = newGroupValue;
+        // Replace the actual groupValue
+        newMetadata.custom.metadata.notebookRunGroups.groupValue = newGroupValue;
+    } else {
+        newMetadata.metadata = newMetadata.metadata || {};
+        newMetadata.metadata.notebookRunGroups = newMetadata.metadata.notebookRunGroups || {};
+
+        // Replace the actual groupValue
+        newMetadata.metadata.notebookRunGroups.groupValue = newGroupValue;
+    }
 
     // Perform our actual replace and edit
     const wsEdit = new vscode.WorkspaceEdit();
     const notebookEdit = vscode.NotebookEdit.updateCellMetadata(cell.index, newMetadata);
     wsEdit.set(cell.notebook.uri, [notebookEdit]);
     vscode.workspace.applyEdit(wsEdit);
+}
+
+function useCustomMetadata() {
+    if (vscode.extensions.getExtension('vscode.ipynb')?.exports?.dropCustomMetadata) {
+        return false;
+    }
+    return true;
 }
