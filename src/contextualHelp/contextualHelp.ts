@@ -53,7 +53,9 @@ export class ContextualHelp extends WebviewViewHost<MessageMapping> implements v
         token: vscode.CancellationTokenSource;
         code: string;
         cursor_pos: number;
+        lineNumber: number;
         word: string;
+        wordAtPos: string;
         document: vscode.TextDocument;
     };
     public showHelp(editor: vscode.TextEditor) {
@@ -64,10 +66,13 @@ export class ContextualHelp extends WebviewViewHost<MessageMapping> implements v
         const cursor_pos = editor.document.offsetAt(editor.selection.active);
 
         // Word under cursor can be computed from the line
+        const lineNumber = editor.selection.active.line;
         const line = editor.document.lineAt(editor.selection.active.line).text;
         // Find first quote, parenthesis or space to the left
         let start = editor.selection.active.character;
         let end = editor.selection.active.character + 1;
+        const wordPos = editor.document.getWordRangeAtPosition(editor.selection.active);
+        const wordAtPos = wordPos ? editor.document.getText(wordPos) : '';
         let startFound = false;
         let endFound = false;
         while (!startFound || !endFound) {
@@ -88,8 +93,9 @@ export class ContextualHelp extends WebviewViewHost<MessageMapping> implements v
         }
         if (
             this.lastHelpRequest?.code === code &&
-            this.lastHelpRequest?.cursor_pos === cursor_pos &&
-            this.lastHelpRequest?.word === word
+            (this.lastHelpRequest?.cursor_pos === cursor_pos || this.lastHelpRequest?.lineNumber === lineNumber) &&
+            this.lastHelpRequest?.word === word &&
+            this.lastHelpRequest?.wordAtPos === wordAtPos
         ) {
             return;
         }
@@ -98,6 +104,8 @@ export class ContextualHelp extends WebviewViewHost<MessageMapping> implements v
             code,
             cursor_pos,
             word,
+            lineNumber,
+            wordAtPos,
             document: editor.document,
             token
         };
