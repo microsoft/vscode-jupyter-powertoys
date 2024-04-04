@@ -8,22 +8,16 @@ import { isNotebookCell } from './common/utils';
 import { Identifiers } from './constants';
 import { disposables } from './extension';
 import { IExportedKernelService, JupyterAPI, type KernelConnectionMetadata } from './jupyter-extension/types';
-import { SharedMessages, MessageMapping, WindowMessages } from './messages';
+import { MessageMapping, WindowMessages } from './messages';
 import { StatusProvider } from './statusProvider';
 import { Resource, IWebviewViewProvider, IStatusParticipant } from './types';
 import { createCodeCell } from './ui/common/cellFactory';
 import { CellState, ICell } from './ui/common/types';
 import { SimpleMessageListener } from './webviews/simpleMessageListener';
-
 import { WebviewViewHost } from './webviews/webviewViewHost';
 import type { Jupyter, Kernel } from '@vscode/jupyter-extension';
 import { escapeStringToEmbedInPythonCode, execCodeInBackgroundThread } from '../common/backgroundExecution';
-import type {
-    IInspectReply,
-    IInspectReplyMsg,
-    IReplyAbortContent,
-    IReplyErrorContent
-} from '@jupyterlab/services/lib/kernel/messages';
+import type { IInspectReplyMsg } from '@jupyterlab/services/lib/kernel/messages';
 import type { ISessionConnection } from '@jupyterlab/services/lib/session/session';
 
 const root = path.join(__dirname, 'ui', 'viewers');
