@@ -382,18 +382,13 @@ export class ContextualHelp extends WebviewViewHost<MessageMapping> implements v
     private async getKernel(notebook: vscode.NotebookDocument) {
         if (!this.kernelService) {
             // Load the jupyter extension if possible
-            const extension = vscode.extensions.getExtension('ms-toolsai.jupyter');
+            const extension = vscode.extensions.getExtension<JupyterAPI>('ms-toolsai.jupyter');
             if (extension) {
                 await extension.activate();
-                const exports = extension.exports as JupyterAPI;
-                if (exports && (exports as any).getKernelService) {
-                    this.kernelService = await exports.getKernelService();
-                    this.kernelService?.onDidChangeKernels(this.activeKernelChanged, this, disposables);
-                }
+                this.kernelService = await extension.exports.getKernelService();
+                this.kernelService?.onDidChangeKernels(this.activeKernelChanged, this, disposables);
             }
         }
-        if (this.kernelService && notebook) {
-            return this.kernelService.getKernel(notebook.uri);
-        }
+        return this.kernelService ? this.kernelService.getKernel(notebook.uri) : undefined;
     }
 }
