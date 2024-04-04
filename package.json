@@ -579,7 +579,6 @@
         "webpack-fix-default-import-plugin": "^1.0.3"
     },
     "dependencies": {
-        "@c4312/evt": "^0.1.1",
         "@jupyterlab/coreutils": "^6.0.3",
         "@jupyterlab/nbformat": "^4.0.3",
         "@jupyterlab/services": "^7.0.3",
