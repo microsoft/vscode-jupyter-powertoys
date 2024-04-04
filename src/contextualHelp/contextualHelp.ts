@@ -57,6 +57,7 @@ export class ContextualHelp extends WebviewViewHost<MessageMapping> implements v
         word: string;
         wordAtPos: string;
         document: vscode.TextDocument;
+        timer?: NodeJS.Timeout;
     };
     public showHelp(editor: vscode.TextEditor) {
         // Code should be the entire cell
@@ -88,9 +89,6 @@ export class ContextualHelp extends WebviewViewHost<MessageMapping> implements v
             }
         }
         const word = line.slice(start, end);
-        if (this.lastHelpRequest?.token) {
-            this.lastHelpRequest.token.cancel();
-        }
         if (
             this.lastHelpRequest?.code === code &&
             (this.lastHelpRequest?.cursor_pos === cursor_pos || this.lastHelpRequest?.lineNumber === lineNumber) &&
@@ -99,7 +97,23 @@ export class ContextualHelp extends WebviewViewHost<MessageMapping> implements v
         ) {
             return;
         }
+        if (this.lastHelpRequest?.token) {
+            this.lastHelpRequest.token.cancel();
+        }
+        if (this.lastHelpRequest?.timer) {
+            clearTimeout(this.lastHelpRequest.timer);
+        }
         const token = new vscode.CancellationTokenSource();
+        // lets wait a while before showing the help
+        // We need to wait for the user to stop typing before we show the help
+        // Or possible user is tabbing through cells/files, etc
+        const timer = setTimeout(() => {
+            // Make our inspect request
+            this.inspect(code, cursor_pos, word, editor.document, token.token).finally(() => {
+                token.dispose();
+            });
+        }, 300);
+
         this.lastHelpRequest = {
             code,
             cursor_pos,
@@ -107,12 +121,9 @@ export class ContextualHelp extends WebviewViewHost<MessageMapping> implements v
             lineNumber,
             wordAtPos,
             document: editor.document,
-            token
+            token,
+            timer
         };
-        // Make our inspect request
-        this.inspect(code, cursor_pos, word, editor.document, token.token).finally(() => {
-            token.dispose();
-        });
     }
 
     public async load(codeWebview: vscode.WebviewView) {
