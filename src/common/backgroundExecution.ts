@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { CancellationToken, type Disposable, type NotebookCellOutputItem } from 'vscode';
+import { CancellationToken, type Disposable, type NotebookCellOutput, type NotebookCellOutputItem } from 'vscode';
 import { Kernel } from '@vscode/jupyter-extension';
 import { raceCancellation } from './cancellation';
 import type * as nbformat from '@jupyterlab/nbformat';
@@ -51,7 +51,7 @@ del __jupyter_exec_powerToys_background__
         token,
         new Promise<T | undefined>((resolve, reject) => {
             disposables.push(
-                kernel.onDidReceiveDisplayUpdate(async (output) => {
+                kernel.onDidReceiveDisplayUpdate(async (output: NotebookCellOutput) => {
                     if (token.isCancellationRequested) {
                         return resolve(undefined);
                     }
