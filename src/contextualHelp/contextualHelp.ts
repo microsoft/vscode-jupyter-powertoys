@@ -5,9 +5,9 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 import { logError } from './common/logging';
 import { isNotebookCell } from './common/utils';
-import { EXTENSION_ROOT_DIR, Identifiers } from './constants';
+import { Identifiers } from './constants';
 import { disposables } from './extension';
-import { IExportedKernelService, JupyterAPI } from './jupyter-extension/types';
+import { IExportedKernelService, JupyterAPI, type KernelConnectionMetadata } from './jupyter-extension/types';
 import { SharedMessages, MessageMapping, WindowMessages } from './messages';
 import { StatusProvider } from './statusProvider';
 import { Resource, IWebviewViewProvider, IStatusParticipant } from './types';
@@ -16,6 +16,15 @@ import { CellState, ICell } from './ui/common/types';
 import { SimpleMessageListener } from './webviews/simpleMessageListener';
 
 import { WebviewViewHost } from './webviews/webviewViewHost';
+import type { Jupyter, Kernel } from '@vscode/jupyter-extension';
+import { escapeStringToEmbedInPythonCode, execCodeInBackgroundThread } from '../common/backgroundExecution';
+import type {
+    IInspectReply,
+    IInspectReplyMsg,
+    IReplyAbortContent,
+    IReplyErrorContent
+} from '@jupyterlab/services/lib/kernel/messages';
+import type { ISessionConnection } from '@jupyterlab/services/lib/session/session';
 
 const root = path.join(__dirname, 'ui', 'viewers');
 
@@ -33,16 +42,12 @@ export class ContextualHelp extends WebviewViewHost<MessageMapping> implements v
         }
         return undefined;
     }
-    constructor(
-        provider: IWebviewViewProvider,
-        private readonly statusProvider: StatusProvider
-    ) {
+    constructor(provider: IWebviewViewProvider, private readonly statusProvider: StatusProvider) {
         super(provider, (c, d) => new SimpleMessageListener(c, d), root, [path.join(root, 'contextualHelp.js')]);
 
         // Sign up if the active variable view notebook is changed, restarted or updated
         vscode.window.onDidChangeActiveNotebookEditor(this.activeEditorChanged, this, disposables);
         vscode.window.onDidChangeTextEditorSelection(this.activeSelectionChanged, this, disposables);
-        vscode.window.onDidChangeNotebookEditorSelection(this.activeNotebookSelectionChanged, this, disposables);
     }
 
     // Used to identify this webview in telemetry, not shown to user so no localization
@@ -50,7 +55,13 @@ export class ContextualHelp extends WebviewViewHost<MessageMapping> implements v
     public get title(): string {
         return 'contextualHelp';
     }
-
+    private lastHelpRequest?: {
+        token: vscode.CancellationTokenSource;
+        code: string;
+        cursor_pos: number;
+        word: string;
+        document: vscode.TextDocument;
+    };
     public showHelp(editor: vscode.TextEditor) {
         // Code should be the entire cell
         const code = editor.document.getText();
@@ -78,9 +89,28 @@ export class ContextualHelp extends WebviewViewHost<MessageMapping> implements v
             }
         }
         const word = line.slice(start, end);
-
+        if (this.lastHelpRequest?.token) {
+            this.lastHelpRequest.token.cancel();
+        }
+        if (
+            this.lastHelpRequest?.code === code &&
+            this.lastHelpRequest?.cursor_pos === cursor_pos &&
+            this.lastHelpRequest?.word === word
+        ) {
+            return;
+        }
+        const token = new vscode.CancellationTokenSource();
+        this.lastHelpRequest = {
+            code,
+            cursor_pos,
+            word,
+            document: editor.document,
+            token
+        };
         // Make our inspect request
-        this.inspect(code, cursor_pos, word, editor.document);
+        this.inspect(code, cursor_pos, word, editor.document, token.token).finally(() => {
+            token.dispose();
+        });
     }
 
     public async load(codeWebview: vscode.WebviewView) {
@@ -186,7 +216,8 @@ export class ContextualHelp extends WebviewViewHost<MessageMapping> implements v
         code: string,
         cursor_pos: number,
         word: string,
-        document: vscode.TextDocument
+        document: vscode.TextDocument,
+        token: vscode.CancellationToken
     ): Promise<boolean> {
         let result = true;
         // Skip if notebook not set
@@ -194,25 +225,16 @@ export class ContextualHelp extends WebviewViewHost<MessageMapping> implements v
             return result;
         }
 
-        // Determine help level
-        const config = vscode.workspace.getConfiguration('jupyter');
-        const detail_level = config.get('contextualHelp.detailLevel', 'normal') === 'normal' ? 0 : 1;
-
         // Start a status item
         const status = this.setStatus('Executing code', false);
 
         try {
             // Make sure we're loaded first.
-            const kernel = await this.getKernel(document);
-
-            const result =
-                kernel && code && code.length > 0 && kernel.connection.kernel
-                    ? await kernel.connection.kernel.requestInspect({ code, cursor_pos, detail_level })
-                    : undefined;
-            if (result && result.content.status === 'ok' && 'text/plain' in result.content.data) {
+            const content = await this.doInspect(code, cursor_pos, document, token);
+            if (content && content.status === 'ok' && 'text/plain' in content.data) {
                 const output: nbformat.IStream = {
                     output_type: 'stream',
-                    text: [result.content.data['text/plain']!.toString()],
+                    text: [content.data['text/plain']!.toString()],
                     name: 'stdout',
                     metadata: {},
                     execution_count: 1
@@ -239,7 +261,7 @@ export class ContextualHelp extends WebviewViewHost<MessageMapping> implements v
                     state: CellState.finished,
                     data: createCodeCell(word)
                 };
-                cell.data.execution_count = kernel ? 1 : 0;
+                cell.data.execution_count = 0;
 
                 // Then send the combined output to the UI
                 this.sendCellsToWebView([cell]);
@@ -250,7 +272,80 @@ export class ContextualHelp extends WebviewViewHost<MessageMapping> implements v
 
         return result;
     }
+    private pendingRequests = new WeakMap<
+        | Kernel
+        | {
+              metadata: KernelConnectionMetadata;
+              connection: ISessionConnection;
+          },
+        Promise<unknown>
+    >();
+    private async doInspect(
+        code: string,
+        cursor_pos: number,
+        document: vscode.TextDocument,
+        token: vscode.CancellationToken
+    ) {
+        if (!code || code.length === 0) {
+            return;
+        }
+        const notebook = vscode.workspace.notebookDocuments.find((n) =>
+            n.getCells().find((c) => c.document.uri.toString() === document.uri.toString())
+        );
+        if (!notebook) {
+            return;
+        }
+        const jupyterExt = vscode.extensions.getExtension<Jupyter>('ms-toolsai.jupyter');
+        if (!jupyterExt?.isActive) {
+            return;
+        }
+        if (!jupyterExt.isActive) {
+            await jupyterExt.activate();
+        }
+        // Determine help level
+        const config = vscode.workspace.getConfiguration('jupyter');
+        const detail_level = config.get('contextualHelp.detailLevel', 'normal') === 'normal' ? 0 : 1;
 
+        const kernel = await jupyterExt.exports.kernels.getKernel(notebook.uri);
+        if (!kernel || token.isCancellationRequested) {
+            return;
+        }
+        // We do not want more than one request at a time.
+        if (this.pendingRequests.has(kernel)) {
+            return;
+        }
+
+        let promise: Promise<IInspectReplyMsg['content'] | undefined>;
+        if (kernel?.language === 'python') {
+            // This is more efficient as we can run the code in a background thread.
+            const codeToExecute = `return get_ipython().kernel.do_inspect("${escapeStringToEmbedInPythonCode(
+                code
+            )}", ${cursor_pos}, ${detail_level})`;
+            promise = execCodeInBackgroundThread<IInspectReplyMsg['content']>(kernel, [codeToExecute], token);
+        } else {
+            const oldKernel = await this.getKernel(notebook);
+            if (!oldKernel?.connection.kernel) {
+                return;
+            }
+            promise = oldKernel.connection.kernel
+                .requestInspect({ code, cursor_pos, detail_level })
+                .then((result) => result.content);
+        }
+
+        this.pendingRequests.set(kernel, promise);
+        const content = await promise
+            .catch((ex) => {
+                console.error(`Failed to inspect for ${code} @ ${cursor_pos} in ${notebook.uri}`, ex);
+                return;
+            })
+            .finally(() => {
+                if (this.pendingRequests.get(kernel) === promise) {
+                    this.pendingRequests.delete(kernel);
+                }
+            });
+
+        return content;
+    }
     private async activeEditorChanged(editor: vscode.NotebookEditor | undefined) {
         // Update the state of the control based on editor
         await this.postMessage(WindowMessages.HideUI, editor === undefined);
@@ -284,22 +379,16 @@ export class ContextualHelp extends WebviewViewHost<MessageMapping> implements v
         }
     }
 
-    private async getKernel(document: vscode.TextDocument) {
-        // Find matching notebook if there is one
-        const notebook = vscode.workspace.notebookDocuments.find((n) =>
-            n.getCells().find((c) => c.document.uri.toString() === document.uri.toString())
-        );
+    private async getKernel(notebook: vscode.NotebookDocument) {
         if (!this.kernelService) {
-            if (notebook) {
-                // Load the jupyter extension if possible
-                const extension = vscode.extensions.getExtension('ms-toolsai.jupyter');
-                if (extension) {
-                    await extension.activate();
-                    const exports = extension.exports as JupyterAPI;
-                    if (exports && (exports as any).getKernelService) {
-                        this.kernelService = await exports.getKernelService();
-                        this.kernelService?.onDidChangeKernels(this.activeKernelChanged, this, disposables);
-                    }
+            // Load the jupyter extension if possible
+            const extension = vscode.extensions.getExtension('ms-toolsai.jupyter');
+            if (extension) {
+                await extension.activate();
+                const exports = extension.exports as JupyterAPI;
+                if (exports && (exports as any).getKernelService) {
+                    this.kernelService = await exports.getKernelService();
+                    this.kernelService?.onDidChangeKernels(this.activeKernelChanged, this, disposables);
                 }
             }
         }
