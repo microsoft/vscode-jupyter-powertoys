@@ -548,7 +548,7 @@
         "@typescript-eslint/eslint-plugin": "^5.1.0",
         "@typescript-eslint/parser": "^5.1.0",
         "@vscode/dts": "^0.4.0",
-        "@vscode/jupyter-extension": "^0.0.96",
+        "@vscode/jupyter-extension": "^1.0.91",
         "@vscode/test-electron": "^1.6.2",
         "babel-polyfill": "^6.26.0",
         "clean-terminal-webpack-plugin": "^3.0.0",
