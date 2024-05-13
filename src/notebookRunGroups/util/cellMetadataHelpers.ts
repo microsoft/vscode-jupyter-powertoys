@@ -4,7 +4,7 @@ import * as vscode from 'vscode';
 
 // Retrieve the cell run group value
 export function getCellRunGroupMetadata(cell: vscode.NotebookCell): string {
-    const customMetadata = cell.metadata?.custom?.metadata?.notebookRunGroups;
+    const customMetadata = useCustomMetadata() ? cell.metadata?.custom?.metadata?.notebookRunGroups : cell.metadata?.metadata?.notebookRunGroups;
 
     if (customMetadata && customMetadata.groupValue) {
         return customMetadata.groupValue;
