@@ -174,7 +174,7 @@
             },
             {
                 "command": "jupyter.notebookeditor.openContextualHelp",
-                "title": "%jupyter.command.jupyter.openContextualHelp.title%",
+                "title": "Open Context Menu Help",
                 "category": "Notebook",
                 "enablement": "notebookType == jupyter-notebook && isWorkspaceTrusted && jupyter.ispythonnotebook"
             },
@@ -269,7 +269,7 @@
                 },
                 {
                     "command": "jupyter.notebookeditor.openContextualHelp",
-                    "title": "%jupyter.command.jupyter.openContextualHelp.title%",
+                    "title": "Open Context Menu Help",
                     "category": "Notebook",
                     "enablement": "isWorkspaceTrusted && jupyter.ispythonnotebook && config.jupyter.contextualHelp.enabled"
                 },
