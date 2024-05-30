@@ -22,7 +22,7 @@
         "url": "https://github.com/Microsoft/vscode-jupyter-powertoys/issues"
     },
     "qna": "https://github.com/microsoft/vscode-jupyter-powertoys/discussions",
-    "version": "0.1.1",
+    "version": "0.1.2",
     "engines": {
         "vscode": "^1.88.0"
     },
@@ -174,7 +174,7 @@
             },
             {
                 "command": "jupyter.notebookeditor.openContextualHelp",
-                "title": "%jupyter.command.jupyter.openContextualHelp.title%",
+                "title": "Open Context Menu Help",
                 "category": "Notebook",
                 "enablement": "notebookType == jupyter-notebook && isWorkspaceTrusted && jupyter.ispythonnotebook"
             },
@@ -269,7 +269,7 @@
                 },
                 {
                     "command": "jupyter.notebookeditor.openContextualHelp",
-                    "title": "%jupyter.command.jupyter.openContextualHelp.title%",
+                    "title": "Open Context Menu Help",
                     "category": "Notebook",
                     "enablement": "isWorkspaceTrusted && jupyter.ispythonnotebook && config.jupyter.contextualHelp.enabled"
                 },
