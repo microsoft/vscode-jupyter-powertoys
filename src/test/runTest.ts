@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 import * as path from 'path';
 
-import { downloadAndUnzipVSCode, resolveCliPathFromVSCodeExecutablePath, runTests } from '@vscode/test-electron';
+import { downloadAndUnzipVSCode, resolveCliArgsFromVSCodeExecutablePath, runTests } from '@vscode/test-electron';
 import { spawnSync } from 'child_process';
 
 async function main() {
@@ -15,7 +15,7 @@ async function main() {
 		const vscodeExecutablePath = await downloadAndUnzipVSCode('insiders');
 
 		// Install needed extensions
-		await installDependencyExtensions(vscodeExecutablePath);
+		installDependencyExtensions(vscodeExecutablePath);
 
 		await runTests({ extensionDevelopmentPath, extensionTestsPath, vscodeExecutablePath });
 	} catch (err) {
@@ -25,12 +25,16 @@ async function main() {
 }
 
 function installDependencyExtensions(vscodeExecutablePath: string) {
-	// Install the Jupyter Extension
-	const cliPath = resolveCliPathFromVSCodeExecutablePath(vscodeExecutablePath);
-    spawnSync(cliPath, ['--install-extension', 'ms-toolsai.jupyter'], {
+	// Install the Jupyter Extension into the test extensions directory
+	const [cli, ...args] = resolveCliArgsFromVSCodeExecutablePath(vscodeExecutablePath);
+    const result = spawnSync(cli, [...args, '--install-extension', 'ms-toolsai.jupyter'], {
         encoding: 'utf-8',
-        stdio: 'inherit'
+        stdio: 'inherit',
+        shell: process.platform === 'win32'
     });
+    if (result.status !== 0) {
+        throw new Error(`Failed to install ms-toolsai.jupyter: exit code ${result.status}`);
+    }
 }
 
 main();
