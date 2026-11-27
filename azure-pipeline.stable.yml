@@ -22,6 +22,11 @@ extends:
     template: azure-pipelines/extension/stable.yml@templates
     parameters:
         publishExtension: ${{ parameters.publishExtension }}
+        skipAPIScan: >-
+            ${{ or(startsWith(variables['Build.SourceBranch'], 'refs/pull/'),
+                   and(startsWith(variables['Build.SourceBranch'], 'refs/heads/'),
+                       notIn(variables['Build.SourceBranch'], 'refs/heads/main', 'refs/heads/release'),
+                       not(startsWith(variables['Build.SourceBranch'], 'refs/heads/release/')))) }}
         buildSteps:
             - script: npm i -g npm@10.8.2
               displayName: npm install npm@10.8.2
